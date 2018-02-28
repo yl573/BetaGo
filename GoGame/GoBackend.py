@@ -122,12 +122,22 @@ class Position(namedtuple('Position', ['board', 'ko'])):
         return None
 
     def __str__(self):
+        return self.board_to_str(self.board)
+
+    def board_to_str(self, board):
         s = ''
         for i in range(N):
             for j in range(N):
-                s += self.board[i*N+j] + ' '
+                s += board[i*N+j] + ' '
             s += '\n'
         return s
+
+    def print_illegal_move(self, fc):
+        print(self)
+        l = list(self.board)
+        l[fc] = '#'
+        print(self.board_to_str(''.join(l)))
+        
 
     def get_legal_moves(self):
         board = [1 if x==EMPTY else 0 for x in self.board ]
@@ -136,7 +146,7 @@ class Position(namedtuple('Position', ['board', 'ko'])):
     def play_move(self, fc, color):
         board, ko = self
         if fc == ko or board[fc] != EMPTY:
-            print(self)
+            self.print_illegal_move(fc)
             raise IllegalMove 
 
         possible_ko_color = is_koish(board, fc)

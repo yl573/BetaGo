@@ -2,34 +2,18 @@ import numpy as np
 from GoGame.GoSimulator import GoSimulator
 from Shared.Consts import BLACK, WHITE
 from Shared.Functions import toggle_player
-from Shared.GoState import GoState
-
-class BoardArray():
-    def __init__(self, np_arr):
-        self.data = np_arr
-
-    def __getitem__(self, pos):
-        return self.data[pos[0]][pos[1]]
-
-    def __setitem__(self, pos, value):
-        self.self.data[pos[0]][pos[1]] = value
-
-    def __repr__(self):
-        return str(self.data)
-
+import math
 
 class MCTNode:
 
-    def _get_zeros(self):
-        return BoardArray(np.zeros((self.N, self.N)))
-
-    def __init__(self, board, P):
-        self.board = board
-        self.N = board.shape[0]
-        self.N = self._get_zeros()
-        self.W = self._get_zeros()
-        self.Q = self._get_zeros()
+    def __init__(self, boards, P, player):
+        self.boards = boards
+        self.m, self.n, _ = boards.shape
+        self.N = np.zeros((self.n, self.n))
+        self.W = np.zeros((self.n, self.n))
+        self.Q = np.zeros((self.n, self.n))
         self.P = P
+        self.player = player
         self.children = {}
 
     def find_child(self, move):
@@ -37,104 +21,97 @@ class MCTNode:
             return self.children[str(move)]
         return None
 
+    def add_child(self, move, child):
+        self.children[str(move)] = child
+
 
 def select_max(score):
     i = np.argmax(score)
     N = score.shape[0]
-    return (int(i/N), i%N)
+    x = i%N
+    y = int(i/N)
+    return x, y
 
-def search(node):
-    U = None
-    move = select_max(node.Q + U)
-    child = node.find_child(move)
-    if child is not None:
-        V = search(child)
-    else:
-        game.set_board(node.board)
-        board = game.play(*move)
-        P, V = model.eval(board)
-        node.children.append(MCTNode(board, P))
+def calc_U(P, N, cpuct=1):
+    N_sum = np.sum(N)
+    return cpuct * P * np.sqrt(N_sum) / (1 + N)
 
+def update_boards(boards, new_board):
+    new_boards = np.delete(boards, 0, axis=0)
+    new_board = np.array([new_board])
+    return np.concatenate((new_boards, new_board))
 
-    node.W[move] += V
-    node.N[move] += 1
-    node.Q[move] = node.W[move]/node.N[move]
-    return V
+def score_to_win_prob(last_player, black_lead):
+    if black_lead == 0:
+        return 0.5
+    return 1 * (not (black_lead > 0) ^ (last_player == BLACK))
 
-t = np.array([
-    [1,0,0,0],
-    [0,2,0,0],
-    [0,0,3,0],
-    [0,0,0,0]
-])
-# print(select_max(t))
-root = MCTNode(t, )
-game = GoSimulator()
-search(t)
+class MCTS:
+    def __init__(self, model, player, m=8, n=5, start_boards=None):
+        self.model = model
+        self.game = GoSimulator(n)
+        self.m = m
+        self.n = n
+        self.root = self._create_root(start_boards, player)
 
+    def _create_root(self, start_boards, player):
+        if start_boards is not None:
+            boards = start_boards
+        else:
+            boards = np.zeros((self.m, self.n, self.n))
+        P, _ = self.model.eval(boards)
+        return MCTNode(boards, P, player)
 
-# class MCTS:
-#     def __init__(self, start_states, model):
-#         '''board_record has the last n board positions'''
-#         self.N = start_states.shape[0]
-#         self.game = GoSimulator()
-#         self.model = model
+    def search_for_pi(self, iterations=10, temp=1):
+        for i in range(iterations):
+            self._search(self.root)
+        pi = np.power(self.root.N, 1/temp) / np.sum(np.power(self.root.N, 1/temp))
+        return pi
 
-#         self.pos_counts = np.zeros((self.N, self.N))
-#         self.create_tree(start_states)
-#         ko = GoSimulator.ko_from_boards(start_states[-2].board, start_states[-1].board)
-#         self.game.set_board(start_states[-1].board, start_states[-1].player, ko=ko)
+    def set_move(self, move):
+        new_root = self.root.find_child(move)
+        if new_root is None:
+            raise ValueError("Invalid move")
+        self.root = new_root
 
-#     def create_tree(self, start_states):
-#         self.root = MCTNode(start_states[0], None)
-#         prev_node = self.root
-#         for b in start_states[1:]:
-#             new_node = MCTNode(b, prev_node)
-#             prev_node.children.append(new_node)
-#             prev_node = new_node
+    def _search(self, node):
 
-#     def _sample_board(self, board_prob):
-#         rnd = np.random.uniform()
-#         prob_flat = board_prob.flatten()
-#         cumsum = np.cumsum(prob_flat)
-#         index = len(cumsum) - len([p for p in cumsum if p > rnd])
-#         N = board_prob.shape[0]
-#         return (int(index / N), index % N)
+        self.game.set_board_from_prev_boards(node.boards, node.player)
+        legal = self.game.get_legal_moves()
 
-#     def search(self, steps, n_past_moves=8):
-#         for s in steps:
-#             # need do record past few moves as well
-#             past_moves = self.get_past_boards(n_past_moves)
-#             prior, value = self.model.predict(past_moves)
+        # if there are no more positions to play
+        if np.sum(legal) == 0:
+            # evaluate who won
+            return score_to_win_prob(toggle_player(node.player), self.game.black_score_lead())
+        
+        U = calc_U(node.P, node.N)
+        score = (node.Q + U)
+        if np.sum(score) == 0: 
+            # if no moves have been played before
+            # pick a random position
+            score = np.random.uniform(size=[self.n, self.n])
+        # add a negative score of -2 to illegal moves so that they will never be chosen 
+        score = score - (1-legal)*2
+        move = select_max(score)
 
+        child = node.find_child(move)
+        if child is not None:
+            V = self._search(child)
+        else:
+            # print(self.game.board)
+            # print(legal)
+            # print(score * legal)
+            # print(move)
 
-#             prior *= self.game.board.get_legal_moves()
-#             prior /= np.sum(prior)
-#             move = self._sample_board(prior)
-#             self.pos_counts[move[0]][move[1]] += 1
+            board, next_player = self.game.play(*move)
+            new_boards = update_boards(node.boards, board)
+            P, V = self.model.eval(new_boards)
+            child = MCTNode(new_boards, P, next_player)
+            node.add_child(move, child)
 
-#             player, board = self.game.play(*move)
-#             self.
+        x, y = move
+        node.W[y][x] += V
+        node.N[y][x] += 1
+        node.Q[y][x] = node.W[y][x]/node.N[y][x]
+        return V
 
-
-# ini_board = np.array([[0, 0, 1, -1, 0], [0, 1, 1, -1, 0], [0, 1, -1, 0, -1],
-#                       [1, 0, 1, -1, 0], [0, 0, 1, -1, 0]])
-# # ini_board = np.array([
-# #     [0,0,0,0,0],
-# #     [0,0,0,0,0],
-# #     [0,0,0,0,0],
-# #     [0,0,0,0,0],
-# #     [0,0,0,0,0]
-# # ])
-
-# ini_moves = [(2, 3)]
-
-
-# class Model:
-#     def predict(self, board):
-#         return np.array([[0.1, 0.1], [0.4, 0.4]])
-
-# model = Model()
-
-# mcts = MCTS(ini_board, ini_moves, BLACK, model)
-# mcts.search(10)

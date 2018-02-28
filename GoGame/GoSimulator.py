@@ -32,7 +32,7 @@ class GoSimulator:
         self.current_player = next_player
 
     def play(self, x, y):
-        self.board = self.board.play_move(x*self.N+y, self.current_player)
+        self.board = self.board.play_move(y*self.N+x, self.current_player)
         self.current_player = toggle_player(self.current_player)
         return (self.as_array(), self.current_player)
 
