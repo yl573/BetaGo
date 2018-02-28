@@ -1,9 +1,9 @@
 import itertools
 from collections import namedtuple
+from Shared.Consts import WHITE, BLACK, EMPTY
 
 N = 19
 NN = N ** 2
-WHITE, BLACK, EMPTY= 'O', 'X', '.'
 EMPTY_BOARD = EMPTY * NN
 
 def swap_colors(color):
@@ -106,17 +106,28 @@ def is_koish(board, fc):
     else:
         return None
 
+
+
 class Position(namedtuple('Position', ['board', 'ko'])):
     @staticmethod
     def initial_state():
         return Position(board=EMPTY_BOARD, ko=None)
 
-    def get_board(self):
-        return self.board
+    @staticmethod
+    def set_board(board, ko):
+        return Position(board=board, ko=ko)
+
+    @staticmethod
+    def find_ko(board1, board2, last_player):
+        return None
 
     def __str__(self):
-        import textwrap
-        return '\n'.join(textwrap.wrap(self.board, N))
+        s = ''
+        for i in range(N):
+            for j in range(N):
+                s += self.board[i*N+j] + ' '
+            s += '\n'
+        return s
 
     def get_legal_moves(self):
         board = [1 if x==EMPTY else 0 for x in self.board ]
@@ -126,7 +137,7 @@ class Position(namedtuple('Position', ['board', 'ko'])):
         board, ko = self
         if fc == ko or board[fc] != EMPTY:
             print(self)
-            raise IllegalMove
+            raise IllegalMove 
 
         possible_ko_color = is_koish(board, fc)
         new_board = place_stone(color, board, fc)
@@ -161,6 +172,9 @@ class Position(namedtuple('Position', ['board', 'ko'])):
         while EMPTY in board:
             fempty = board.index(EMPTY)
             empties, borders = find_reached(board, fempty)
+            if len(borders) == 0:
+                # there is no stone on the board
+                return 0
             possible_border_color = board[list(borders)[0]]
             if all(board[fb] == possible_border_color for fb in borders):
                 board = bulk_place_stones(possible_border_color, board, empties)
