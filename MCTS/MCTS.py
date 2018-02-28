@@ -9,9 +9,9 @@ class MCTNode:
     def __init__(self, boards, P, player):
         self.boards = boards
         self.m, self.n, _ = boards.shape
-        self.N = np.zeros((self.n, self.n))
-        self.W = np.zeros((self.n, self.n))
-        self.Q = np.zeros((self.n, self.n))
+        self.N = np.zeros(self.n**2+1)
+        self.W = np.zeros(self.n**2+1)
+        self.Q = np.zeros(self.n**2+1)
         self.P = P
         self.player = player
         self.children = {}
@@ -27,10 +27,7 @@ class MCTNode:
 
 def select_max(score):
     i = np.argmax(score)
-    N = score.shape[0]
-    x = i%N
-    y = int(i/N)
-    return x, y
+    return i
 
 def calc_U(P, N, cpuct=1):
     N_sum = np.sum(N)
@@ -77,7 +74,8 @@ class MCTS:
     def _search(self, node):
 
         self.game.set_board_from_prev_boards(node.boards, node.player)
-        legal = self.game.get_legal_moves()
+        legal = self.game.get_legal_moves().flatten()
+        legal = np.append(legal, 1)
 
         # if there are no more positions to play
         if np.sum(legal) == 0:
@@ -89,7 +87,7 @@ class MCTS:
         if np.sum(score) == 0: 
             # if no moves have been played before
             # pick a random position
-            score = np.random.uniform(size=[self.n, self.n])
+            score = np.random.uniform(size=(self.n**2+1))
         # add a negative score of -2 to illegal moves so that they will never be chosen 
         score = score - (1-legal)*2
         move = select_max(score)
@@ -102,16 +100,20 @@ class MCTS:
             # print(legal)
             # print(score * legal)
             # print(move)
-
-            board, next_player = self.game.play(*move)
+            if move == self.n**2: # this is the pass move
+                board, next_player = self.game.pass_move()
+            else:
+                x = move%self.n
+                y = int(move/self.n)
+                board, next_player = self.game.play(x, y)
+                
             new_boards = update_boards(node.boards, board)
             P, V = self.model.eval(new_boards)
             child = MCTNode(new_boards, P, next_player)
             node.add_child(move, child)
 
-        x, y = move
-        node.W[y][x] += V
-        node.N[y][x] += 1
-        node.Q[y][x] = node.W[y][x]/node.N[y][x]
+        node.W[move] += V
+        node.N[move] += 1
+        node.Q[move] = node.W[move]/node.N[move]
         return V
 
