@@ -4,6 +4,24 @@ from Shared.Consts import BLACK, WHITE
 from Shared.Functions import toggle_player
 import math
 
+def select_max(score):
+    i = np.argmax(score)
+    return i
+
+def calc_U(P, N, cpuct=1):
+    N_sum = np.sum(N)
+    return cpuct * P * np.sqrt(N_sum) / (1 + N)
+
+def update_boards(boards, new_board):
+    new_boards = np.delete(boards, 0, axis=0)
+    new_board = np.array([new_board])
+    return np.concatenate((new_boards, new_board))
+
+def score_to_win_prob(last_player, black_lead):
+    if black_lead == 0:
+        return 0.5
+    return 1 * (not (black_lead > 0) ^ (last_player == BLACK))
+
 class MCTNode:
 
     def __init__(self, boards, P, player):
@@ -24,24 +42,6 @@ class MCTNode:
     def add_child(self, move, child):
         self.children[str(move)] = child
 
-
-def select_max(score):
-    i = np.argmax(score)
-    return i
-
-def calc_U(P, N, cpuct=1):
-    N_sum = np.sum(N)
-    return cpuct * P * np.sqrt(N_sum) / (1 + N)
-
-def update_boards(boards, new_board):
-    new_boards = np.delete(boards, 0, axis=0)
-    new_board = np.array([new_board])
-    return np.concatenate((new_boards, new_board))
-
-def score_to_win_prob(last_player, black_lead):
-    if black_lead == 0:
-        return 0.5
-    return 1 * (not (black_lead > 0) ^ (last_player == BLACK))
 
 class MCTS:
     def __init__(self, model, player, m=8, n=5, start_boards=None):

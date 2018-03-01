@@ -30,11 +30,12 @@ player = BLACK
 
 mcts = MCTS(model, player, start_boards=boards)
 
-pi = mcts.search_for_pi(iterations=1000)
+pi = mcts.search_for_pi(iterations=250)
 print(pi)
 
-move = xy_to_index(2, 2, 5)
+move = np.random.choice(len(pi), p=pi)
 mcts.set_move(move)
+print(move)
 
-pi = mcts.search_for_pi(iterations=1000)
+pi = mcts.search_for_pi(iterations=250)
 print(pi)
