@@ -1,7 +1,7 @@
 from . import GoBackend
 import numpy as np
 from Shared.Consts import WHITE, BLACK, EMPTY, num_to_char, char_to_num
-from Shared.Functions import toggle_player
+from Shared.Functions import toggle_player, index_to_xy
 
 class GoSimulator:
 
@@ -20,8 +20,13 @@ class GoSimulator:
         last_player = toggle_player(next_player)
         board1 = self._board_to_string(prev_boards[-2])
         board2 = self._board_to_string(prev_boards[-1]) 
-        ko = GoBackend.Position.find_ko(board1, board2, last_player)
-        self.set_board(prev_boards[-1], next_player)
+        move = GoBackend.Position.find_move(board1, board2, last_player)
+        self.set_board(prev_boards[-2], next_player, ko=None) 
+        self.current_player = last_player 
+        if move is not None:  
+            self.play(*index_to_xy(move, self.N))
+        else:
+            self.pass_move()
 
     def set_board(self, board, next_player, ko=None):
         board_str = self._board_to_string(board)

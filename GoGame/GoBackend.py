@@ -106,7 +106,13 @@ def is_koish(board, fc):
     else:
         return None
 
-
+def board_to_str(board):
+    s = ''
+    for i in range(N):
+        for j in range(N):
+            s += board[i*N+j] + ' '
+        s += '\n'
+    return s
 
 class Position(namedtuple('Position', ['board', 'ko'])):
     @staticmethod
@@ -118,25 +124,20 @@ class Position(namedtuple('Position', ['board', 'ko'])):
         return Position(board=board, ko=ko)
 
     @staticmethod
-    def find_ko(board1, board2, last_player):
+    def find_move(board1, board2, last_player):
+        for i in range(len(board1)):
+            if board1[i] == '.' and board2[i] == last_player:
+                return i
         return None
 
     def __str__(self):
-        return self.board_to_str(self.board)
-
-    def board_to_str(self, board):
-        s = ''
-        for i in range(N):
-            for j in range(N):
-                s += board[i*N+j] + ' '
-            s += '\n'
-        return s
+        return board_to_str(self.board)
 
     def print_illegal_move(self, fc):
         print(self)
         l = list(self.board)
         l[fc] = '#'
-        print(self.board_to_str(''.join(l)))
+        print(board_to_str(''.join(l)))
         
 
     def get_legal_moves(self):
