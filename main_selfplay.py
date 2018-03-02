@@ -11,14 +11,17 @@ class Model:
         return P, V
 
 model = Model()
-
 game = GoSimulator(5)
 
-player = BLACK
+# Starting player
+player = BLACK 
 
 game_selfplay = selfPlay(model, player)
 
-black_lead, boards = game_selfplay.playGame()
+black_score_allgames = []
+boards_across_allgames = []
 
+# Start self play for 1 games
+black_lead, boards = game_selfplay.playGame()
 print(boards)
-print('Black lead : ',black_lead)
+print('Black leads by : ',black_lead)

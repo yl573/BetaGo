@@ -53,7 +53,7 @@ class selfPlay:
 
             if arg_max == 25: # PASS
                 print(player, ' PASSES \n')
-                game.pass_move()
+                board, next_player = game.pass_move()
                 check_pass = check_pass + 1
             else:
                 move_y, move_x = divmod(arg_max, 5) # finds position of move on board and makes play
