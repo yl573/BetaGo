@@ -31,7 +31,7 @@ class selfPlay:
         game.set_board_from_prev_boards(boards, player)
         game.print_board()
 
-        print('+++---------- START ----------+++:\n')
+        print('+++---------- START ----------+++\n')
 
         turn_counter = 2
         check_pass = 0
@@ -48,10 +48,11 @@ class selfPlay:
             arg_pi_max = arg_pi_max.flatten()
 
             arg_max = random.choice(arg_pi_max) # to deal with multiple maximums
-            print('arg_max ',arg_max)
+            # print('arg_max ',arg_max)
 
 
             if arg_max == 25: # PASS
+                print(player, ' PASSES \n')
                 game.pass_move()
                 check_pass = check_pass + 1
             else:
@@ -59,6 +60,7 @@ class selfPlay:
                 print('Best move x:', move_x)
                 print('Best move y:', move_y,'\n')
                 # Plays the best move
+                print(player, ' MOVES \n')
                 board, next_player = game.play(move_x,move_y)
                 check_pass = 0
 
@@ -74,9 +76,10 @@ class selfPlay:
 
             # Check win condition
             if check_pass >=2:
+                print('GAME OVER FROM 2 PASSES')
                 break 
 
             # time.sleep(0.001)
-
+        print(player, ' WINS!')
         black_lead = game.black_score_lead()
         return black_lead, boards
