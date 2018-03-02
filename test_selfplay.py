@@ -46,7 +46,6 @@ boards = np.array([[
     [0,0,0,0,0]
 ]])
 
-P = np.ones(26)/26
 player = BLACK
 
 game.set_board_from_prev_boards(boards, player)
