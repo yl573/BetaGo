@@ -40,7 +40,7 @@ class Selfplay:
         ### --- Start game --- ###
 
         while True:
-            pi = mcts.search_for_pi(iterations=250)
+            pi = mcts.search_for_pi(iterations=20)
             # print(pi)
 
             # Find position of next play that maximises pi
@@ -80,6 +80,10 @@ class Selfplay:
             if check_pass >=2:
                 print('GAME OVER FROM 2 PASSES')
                 break 
+
+            if turn_counter == 5 * 5 * 2:
+                print('GAME OVER FROM TURN LIMIT REACHED')
+                break
 
             # time.sleep(0.001)
         print(player, ' WINS!')

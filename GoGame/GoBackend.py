@@ -114,6 +114,22 @@ def board_to_str(board):
         s += '\n'
     return s
 
+def find_move(board1, board2): 
+    for i in range(len(board1)):
+        if board1[i] == '.' and board2[i] != '.':
+            return i
+    return None
+
+def find_ko_from_boards(board1, board2):
+    move = find_move(board1, board2)
+    if not move:
+        return None
+    _, captured = maybe_capture_stones(board1, move)
+    if is_koish(board1, move) and len(captured) == 1:
+        return captured.pop()
+    return None
+
+
 class Position(namedtuple('Position', ['board', 'ko'])):
     @staticmethod
     def initial_state():
@@ -122,17 +138,6 @@ class Position(namedtuple('Position', ['board', 'ko'])):
     @staticmethod
     def set_board(board, ko):
         return Position(board=board, ko=ko)
-
-    @staticmethod
-    def find_move(board1, board2, last_player): 
-        pos = None
-        count = 0
-        for i in range(len(board1)):
-            if board1[i] == '.' and board2[i] != '.':
-                pos = i
-                count += 1
-        assert count == 1
-        return pos
 
     def __str__(self):
         return board_to_str(self.board)

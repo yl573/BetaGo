@@ -17,29 +17,15 @@ class GoSimulator:
 
 
     def set_board_from_prev_boards(self, prev_boards, next_player):
-        # last_player = toggle_player(next_player)
-        self.set_board(prev_boards[-1], next_player, ko=None) 
-        # self.current_player = last_player
-        # if np.array_equal(prev_boards[-1], prev_boards[-2]):
-        #     self.set_board(prev_boards[-1], next_player, ko=None) 
-        # else:
-        #     board1 = self._board_to_string(prev_boards[-2])
-        #     board2 = self._board_to_string(prev_boards[-1]) 
-        #     move = GoBackend.Position.find_move(board1, board2, last_player)
-            
-        #     assert move is not None
-
-        #     y, x = divmod(move, self.N)
-        #     self.play(x, y)
-        #     assert np.array_equal(self.get_board(), prev_boards[-1])
-        #     self.current_player = last_player 
+        ko = GoBackend.find_ko_from_boards(
+            self._board_to_string(prev_boards[-2]), 
+            self._board_to_string(prev_boards[-1])
+        )
+        self.set_board(prev_boards[-1], next_player, ko_flat=ko) 
 
 
-    def set_board(self, board, next_player, ko=None):
+    def set_board(self, board, next_player, ko_flat=None):
         board_str = self._board_to_string(board)
-        ko_flat = None
-        if ko is not None:
-            ko_flat = ko[0]*self.N + ko[1]
         self.board = GoBackend.Position.set_board(board=board_str,ko=ko_flat)
         self.current_player = next_player
 

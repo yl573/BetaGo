@@ -28,3 +28,5 @@ game.set_board_from_prev_boards(boards, WHITE)
 print(game.board)
 print(game.board.ko)
 assert game.board.ko == 17
+
+print("Found KO")
