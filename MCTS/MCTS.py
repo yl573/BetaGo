@@ -4,10 +4,6 @@ from Shared.Consts import BLACK, WHITE
 from Shared.Functions import toggle_player
 import math
 
-def select_max(score):
-    i = np.argmax(score)
-    return i
-
 def calc_U(P, N, cpuct=1):
     N_sum = np.sum(N)
     return cpuct * P * np.sqrt(N_sum) / (1 + N)
@@ -51,6 +47,14 @@ class MCTS:
         self.n = n
         self.root = self._create_root(start_boards, player)
 
+    # def print_tree(self, node=None):
+    #     print('MCTS Node')
+    #     if node is None:
+    #         node = self.root
+    #     print(node.boards)
+    #     for child in node.children:
+    #         self.print_tree(child)
+
     def _create_root(self, start_boards, player):
         if start_boards is not None:
             boards = start_boards
@@ -72,15 +76,10 @@ class MCTS:
         self.root = new_root
 
     def _search(self, node):
-
         self.game.set_board_from_prev_boards(node.boards, node.player)
+
         legal = self.game.get_legal_moves().flatten()
         legal = np.append(legal, 1)
-
-        # if there are no more positions to play
-        if np.sum(legal) == 0:
-            # evaluate who won
-            return score_to_win_prob(toggle_player(node.player), self.game.black_score_lead())
         
         U = calc_U(node.P, node.N)
         score = (node.Q + U)
@@ -88,23 +87,20 @@ class MCTS:
             # if no moves have been played before
             # pick a random position
             score = np.random.uniform(size=(self.n**2+1))
-        # add a negative score of -2 to illegal moves so that they will never be chosen 
-        score = score - (1-legal)*2
-        move = select_max(score)
+        
+        score[np.where(legal == 0)] = -np.inf
+        move = np.argmax(score)
+
+        assert legal[move] == 1
 
         child = node.find_child(move)
         if child is not None:
             V = self._search(child)
         else:
-            # print(self.game.board)
-            # print(legal)
-            # print(score * legal)
-            # print(move)
             if move == self.n**2: # this is the pass move
                 board, next_player = self.game.pass_move()
             else:
-                x = move%self.n
-                y = int(move/self.n)
+                y, x = divmod(move, self.n)
                 board, next_player = self.game.play(x, y)
                 
             new_boards = update_boards(node.boards, board)

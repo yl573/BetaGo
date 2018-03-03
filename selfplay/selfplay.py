@@ -29,7 +29,7 @@ class Selfplay:
         boards = np.zeros([2,n,n])
 
         game.set_board_from_prev_boards(boards, player)
-        game.print_board()
+        print(game.board)
 
         print('------------- START -------------\n')
 
@@ -72,7 +72,7 @@ class Selfplay:
             player = next_player
 
             game.set_board_from_prev_boards(boards, player)
-            game.print_board()
+            print(game.board)
             print('---------------------------------\n')
             black_lead = game.black_score_lead()
 

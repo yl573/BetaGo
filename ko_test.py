@@ -27,6 +27,4 @@ boards = np.array([[
 game.set_board_from_prev_boards(boards, WHITE)
 print(game.board)
 print(game.board.ko)
-
-game.play(2, 2)
-# will print illegal move
+assert game.board.ko == 17

@@ -49,7 +49,7 @@ boards = np.array([[
 player = BLACK
 
 game.set_board_from_prev_boards(boards, player)
-game.print_board()
+# game.print_board()
 # or if there is no KO, you can use
 # game.set_board(boards[-1], BLACK)
 
@@ -59,47 +59,56 @@ turn_counter = 2
 check_pass = 0
 
 ### --- Start game --- ###
-
+mcts = MCTS(model, player, start_boards=boards)
 while True:
-    mcts = MCTS(model, player, start_boards=boards)
-    pi = mcts.search_for_pi(iterations=250)
-    # print(pi)
+
+    pi = mcts.search_for_pi(iterations=1)
 
     # Find position of next play that maximises pi
     arg_pi_max = (np.argwhere(pi==np.max(pi)))
     arg_pi_max = arg_pi_max.flatten()
 
     arg_max = random.choice(arg_pi_max) # to deal with multiple maximums
-    print('arg_max ',arg_max)
+    # print('arg_max ',arg_max)
 
     
+    mcts.set_move(arg_max)
+
     if arg_max == 25: # PASS
         game.pass_move()
         check_pass = check_pass + 1
+        print('Passed')
     else:
         move_y, move_x = divmod(arg_max, 5) # finds position of move on board and makes play
-        print('Best move x:', move_x)
-        print('Best move y:', move_y,'\n')
-        # Plays the best move
+        # print('Best move x:', move_x)
+        # print('Best move y:', move_y,'\n')
+        # print('pi: ', pi)
+        print('move: ',move_x, move_y)
+        # # Plays the best move
+
+        print(game.board)
         board, next_player = game.play(move_x,move_y)
+
+        
         check_pass = 0
 
     turn_counter = turn_counter + 1
 
     # Add board to boards
-    boards = addBoardtoBoards(board,boards,turn_counter)
-    player = next_player
+    # boards = addBoardtoBoards(board,boards,turn_counter)
+    # player = next_player
 
-    game.set_board_from_prev_boards(boards, player)
-    game.print_board()
-    black_lead = game.black_score_lead()
+    # game.set_board_from_prev_boards(boards, player)
+    # game.print_board()
+    # black_lead = game.black_score_lead()
 
     # Check win condition
     if check_pass >=2:
         break 
+    if turn_counter == 5 * 5 * 2:
+        break
 
     # time.sleep(0.001)
 
 black_lead = game.black_score_lead()
-print(black_lead)
-print(boards)
+print('black lead: ', black_lead)

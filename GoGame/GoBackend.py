@@ -124,17 +124,23 @@ class Position(namedtuple('Position', ['board', 'ko'])):
         return Position(board=board, ko=ko)
 
     @staticmethod
-    def find_move(board1, board2, last_player):
+    def find_move(board1, board2, last_player): 
+        pos = None
+        count = 0
         for i in range(len(board1)):
-            if board1[i] == '.' and board2[i] == last_player:
-                return i
-        return None
+            if board1[i] == '.' and board2[i] != '.':
+                pos = i
+                count += 1
+        assert count == 1
+        return pos
 
     def __str__(self):
         return board_to_str(self.board)
 
     def print_illegal_move(self, fc):
+        print('Original board:')
         print(self)
+        print('Attempted position:')
         l = list(self.board)
         l[fc] = '#'
         print(board_to_str(''.join(l)))
@@ -142,6 +148,8 @@ class Position(namedtuple('Position', ['board', 'ko'])):
 
     def get_legal_moves(self):
         board = [1 if x==EMPTY else 0 for x in self.board ]
+        if self.ko:
+            board[self.ko] = 0
         return board
     
     def play_move(self, fc, color):

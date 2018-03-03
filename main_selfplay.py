@@ -1,4 +1,4 @@
-from selfplay import Selfplay
+from Selfplay import Selfplay
 from GoGame.GoSimulator import GoSimulator
 from Shared.Consts import BLACK, WHITE
 

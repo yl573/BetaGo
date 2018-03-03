@@ -1,1 +1,1 @@
-from .selfplay import *
+from .Selfplay import *

@@ -1,7 +1,7 @@
 from . import GoBackend
 import numpy as np
 from Shared.Consts import WHITE, BLACK, EMPTY, num_to_char, char_to_num
-from Shared.Functions import toggle_player, index_to_xy
+from Shared.Functions import toggle_player
 
 class GoSimulator:
 
@@ -17,16 +17,23 @@ class GoSimulator:
 
 
     def set_board_from_prev_boards(self, prev_boards, next_player):
-        last_player = toggle_player(next_player)
-        board1 = self._board_to_string(prev_boards[-2])
-        board2 = self._board_to_string(prev_boards[-1]) 
-        move = GoBackend.Position.find_move(board1, board2, last_player)
-        self.set_board(prev_boards[-2], next_player, ko=None) 
-        self.current_player = last_player 
-        if move is not None:  
-            self.play(*index_to_xy(move, self.N))
-        else:
-            self.pass_move()
+        # last_player = toggle_player(next_player)
+        self.set_board(prev_boards[-1], next_player, ko=None) 
+        # self.current_player = last_player
+        # if np.array_equal(prev_boards[-1], prev_boards[-2]):
+        #     self.set_board(prev_boards[-1], next_player, ko=None) 
+        # else:
+        #     board1 = self._board_to_string(prev_boards[-2])
+        #     board2 = self._board_to_string(prev_boards[-1]) 
+        #     move = GoBackend.Position.find_move(board1, board2, last_player)
+            
+        #     assert move is not None
+
+        #     y, x = divmod(move, self.N)
+        #     self.play(x, y)
+        #     assert np.array_equal(self.get_board(), prev_boards[-1])
+        #     self.current_player = last_player 
+
 
     def set_board(self, board, next_player, ko=None):
         board_str = self._board_to_string(board)
@@ -53,13 +60,11 @@ class GoSimulator:
 
     def get_legal_moves(self):
         legal = self.board.get_legal_moves()
-        _, ko = self.board
-        if ko is not None:
-            legal[ko] = 0
         return np.array(legal).reshape((self.N,self.N))
 
-    def print_board(self):
-        print(self.board)
+    def get_board(self):
+        board = [ char_to_num[x] for x in self.board.board ]
+        return np.array(board).reshape((self.N,self.N))
 
     def black_score_lead(self):
         '''Black Score - White Score'''
