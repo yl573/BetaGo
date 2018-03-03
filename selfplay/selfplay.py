@@ -15,7 +15,7 @@ def addBoardtoBoards(board,boards,turn_counter):
     new_boards = np.reshape(new_boards_temp, [turn_counter,m,m])
     return new_boards
 
-class selfPlay:
+class Selfplay:
     def __init__(self, model, player, n=5, start_boards=None):
         self.model = model
         self.game = GoSimulator(n)
@@ -31,15 +31,15 @@ class selfPlay:
         game.set_board_from_prev_boards(boards, player)
         game.print_board()
 
-        print('+++---------- START ----------+++\n')
+        print('------------- START -------------\n')
 
         turn_counter = 2
         check_pass = 0
+        mcts = MCTS(self.model, player, start_boards=boards)
 
         ### --- Start game --- ###
 
         while True:
-            mcts = MCTS(self.model, player, start_boards=boards)
             pi = mcts.search_for_pi(iterations=250)
             # print(pi)
 
@@ -50,11 +50,11 @@ class selfPlay:
             arg_max = random.choice(arg_pi_max) # to deal with multiple maximums
             # print('arg_max ',arg_max)
 
-
             if arg_max == 25: # PASS
                 print(player, ' PASSES \n')
                 board, next_player = game.pass_move()
                 check_pass = check_pass + 1
+
             else:
                 move_y, move_x = divmod(arg_max, 5) # finds position of move on board and makes play
                 print('Best move x:', move_x)
@@ -64,6 +64,7 @@ class selfPlay:
                 board, next_player = game.play(move_x,move_y)
                 check_pass = 0
 
+            mcts.set_move(arg_max)
             turn_counter = turn_counter + 1
 
             # Add board to boards
@@ -72,6 +73,7 @@ class selfPlay:
 
             game.set_board_from_prev_boards(boards, player)
             game.print_board()
+            print('---------------------------------\n')
             black_lead = game.black_score_lead()
 
             # Check win condition

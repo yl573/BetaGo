@@ -1,4 +1,4 @@
-from selfplay import selfPlay
+from selfplay import Selfplay
 from GoGame.GoSimulator import GoSimulator
 from Shared.Consts import BLACK, WHITE
 
@@ -16,7 +16,7 @@ game = GoSimulator(5)
 # Starting player
 player = BLACK 
 
-game_selfplay = selfPlay(model, player)
+game_selfplay = Selfplay(model, player)
 
 black_score_allgames = []
 boards_across_allgames = []
