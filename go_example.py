@@ -34,3 +34,6 @@ print(board, next_player, '\n')
 
 black_lead = game.black_score_lead()
 print(black_lead)
+
+#white_lead = game.white_score_lead()
+#print (white_lead)
