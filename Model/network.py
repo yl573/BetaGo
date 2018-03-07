@@ -1,8 +1,8 @@
 
 import numpy as np
-import keras
 # np.random.seed(123)  # for reproducibility
-
+import keras
+from keras.models import load_model
 from keras import backend as K
 from keras.models import Sequential, Model
 from keras.layers import Dense, Dropout, Activation, Flatten, Conv2D, MaxPooling2D, Lambda, Add, Input, Subtract
@@ -31,10 +31,13 @@ def residual_block(y):
 def policy_loss(y_true, y_pred):
     return -K.sum(y_true * K.log(y_pred))
 
+def load_network(file_path):
+    return load_model(file_path, custom_objects={'policy_loss': policy_loss})
 
-def get_network(input_moves):
+
+def get_network(input_moves, N):
     # this is the actual model for BetaGo
-    inp = Input((2*input_moves+1,5,5))
+    inp = Input((2*input_moves+1,N,N))
 
     # input convolution
     y = Conv2D(32, (3, 3), padding='same', kernel_regularizer=reg)(inp)
@@ -52,7 +55,7 @@ def get_network(input_moves):
     y_policy = BatchNormalization()(y_policy)
     y_policy = Flatten()(y_policy)
     y_policy = Activation('relu')(y_policy)
-    policy_out = Dense(26, activation='softmax', name='policyout', kernel_regularizer=reg)(y_policy)
+    policy_out = Dense(N**2+1, activation='softmax', name='policyout', kernel_regularizer=reg)(y_policy)
 
     # value
     y_value = Conv2D(1, (1, 1), kernel_regularizer=reg)(y)
@@ -66,7 +69,7 @@ def get_network(input_moves):
     model.compile(loss=[policy_loss, 'mse'], optimizer='adam')
     return model
 
-# class m:
+# class TestModel:
 #     def predict(self, board):
 #         P = np.ones(26)/26
 #         V = np.array([0.1])

@@ -11,13 +11,21 @@ def addBoardtoBoards(board,boards,turn_counter):
     new_boards = np.vstack((boards, board_stack))
     return new_boards
 
+def print_winner(black_lead):
+    if black_lead > 0:
+        print('BLACK won by', black_lead)
+    elif black_lead < 0:
+        print('WHITE won by', -black_lead)
+    else:
+        print('The game is a draw')
+
 class Selfplay:
 
-    def __init__(self, model, player, n=5, input_moves=4, start_boards=None, verbose=0):
+    def __init__(self, model, player, size, input_moves, start_boards=None, verbose=0):
         self.model = model
-        self.game = GoSimulator(n)
+        self.game = GoSimulator(size)
         self.player = player
-        self.n = n
+        self.n = size
         self.verbose = verbose
         self.input_moves = input_moves
 
@@ -41,13 +49,13 @@ class Selfplay:
 
         turn_counter = 2
         check_pass = 0
-        mcts = MCTS(self.model, player, start_boards=boards)
+        mcts = MCTS(self.model, player, self.n, self.input_moves, start_boards=boards)
 
         ### --- Start game --- ###
 
         while True:
             pi = mcts.search_for_pi(iterations=iters)
-            self.maybe_print(pi)
+            # self.maybe_print(pi)
 
             # Find position of next play that maximises pi
             move = np.random.choice(len(pi), p=pi)
@@ -58,15 +66,15 @@ class Selfplay:
             # arg_max = random.choice(arg_pi_max) # to deal with multiple maximums
             # # self.maybe_print('arg_max ',arg_max)
 
-            if move == 25: # PASS
+            if move == self.n**2: # PASS
                 self.maybe_print(player, ' PASSES \n')
                 board, next_player = game.pass_move()
                 check_pass = check_pass + 1
 
             else:
-                move_y, move_x = divmod(move, 5) # finds position of move on board and makes play
-                self.maybe_print('Best move x:', move_x)
-                self.maybe_print('Best move y:', move_y,'\n')
+                move_y, move_x = divmod(move, self.n) # finds position of move on board and makes play
+                # self.maybe_print('Best move x:', move_x)
+                # self.maybe_print('Best move y:', move_y,'\n')
                 # Plays the best move
                 self.maybe_print(player, ' MOVES \n')
                 board, next_player = game.play(move_x,move_y)
@@ -90,11 +98,11 @@ class Selfplay:
                 self.maybe_print('GAME OVER FROM 2 PASSES')
                 break 
 
-            if turn_counter == 5 * 5 * 2:
+            if turn_counter == self.n**2 * 2:
                 self.maybe_print('GAME OVER FROM TURN LIMIT REACHED')
                 break
 
-            # time.sleep(0.001)
-        self.maybe_print(player, ' LOST! HAHAHA! LOSER!')
         black_lead = game.black_score_lead()
+        print_winner(black_lead)
+        
         return black_lead, boards, searched_pi

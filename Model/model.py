@@ -1,11 +1,14 @@
 from Shared.Consts import BLACK, WHITE
-from .network import get_network
+from .network import get_network, load_network
 import numpy as np
 
 class Model:
 
-    def __init__(self, input_moves=4):
-        self.model = get_network(input_moves)
+    def __init__(self, size, input_moves, saved_path=None):
+        if saved_path:
+            self.model = load_network(saved_path)
+        else:
+            self.model = get_network(input_moves, size)
         self.input_moves = input_moves
 
     def _reshape_input(self, input_boards, next_player):
@@ -25,6 +28,9 @@ class Model:
         else:
             out[0,-1,:,:] = np.zeros(input_boards[0].shape)
         return out
+
+    def save(self, file_path):
+        self.model.save(file_path)
                     
     def eval(self, boards, next_player):
         assert boards.shape[0] == self.input_moves

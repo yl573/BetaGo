@@ -22,10 +22,10 @@ class MCTNode:
 
     def __init__(self, boards, P, player):
         self.boards = boards
-        self.m, self.n, _ = boards.shape
-        self.N = np.zeros(self.n**2+1)
-        self.W = np.zeros(self.n**2+1)
-        self.Q = np.zeros(self.n**2+1)
+        m, n, _ = boards.shape
+        self.N = np.zeros(n**2+1)
+        self.W = np.zeros(n**2+1)
+        self.Q = np.zeros(n**2+1)
         self.P = P
         self.player = player
         self.children = {}
@@ -40,11 +40,11 @@ class MCTNode:
 
 
 class MCTS:
-    def __init__(self, model, player, m=8, n=5, start_boards=None):
+    def __init__(self, model, player, size, input_moves, start_boards=None):
         self.model = model
-        self.game = GoSimulator(n)
-        self.m = m
-        self.n = n
+        self.game = GoSimulator(size)
+        self.m = size
+        self.n = size
         self.root = self._create_root(start_boards, player)
 
     # def print_tree(self, node=None):
@@ -66,7 +66,7 @@ class MCTS:
     def search_for_pi(self, iterations=10, temp=1):
         for i in range(iterations):
             self._search(self.root)
-        print('P: ', self.root.P)
+        # print('P: ', self.root.P)
         pi = np.power(self.root.N, 1/temp) / np.sum(np.power(self.root.N, 1/temp))
         return pi
 
