@@ -60,12 +60,13 @@ class MCTS:
             boards = start_boards
         else:
             boards = np.zeros((self.m, self.n, self.n))
-        P, _ = self.model.eval(boards)
+        P, _ = self.model.eval(boards, player)
         return MCTNode(boards, P, player)
 
     def search_for_pi(self, iterations=10, temp=1):
         for i in range(iterations):
             self._search(self.root)
+        print('P: ', self.root.P)
         pi = np.power(self.root.N, 1/temp) / np.sum(np.power(self.root.N, 1/temp))
         return pi
 
@@ -104,7 +105,7 @@ class MCTS:
                 board, next_player = self.game.play(x, y)
                 
             new_boards = update_boards(node.boards, board)
-            P, V = self.model.eval(new_boards)
+            P, V = self.model.eval(new_boards, next_player)
             child = MCTNode(new_boards, P, next_player)
             node.add_child(move, child)
 
