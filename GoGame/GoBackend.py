@@ -206,7 +206,7 @@ class Position(namedtuple('Position', ['board', 'ko'])):
                 # if an empty intersection reaches both white and black,
                 # then it belongs to neither player. 
                 board = bulk_place_stones('?', board, empties)
-        return board.count(BLACK) - board.count(WHITE)
+        return board.count(BLACK) - board.count(WHITE) - 1 # komi of 1
 
     def get_liberties(self):
         board = self.board
