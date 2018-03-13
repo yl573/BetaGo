@@ -72,7 +72,7 @@ class Data:
             # Randomly choose a move
             chosen_move = np.random.choice(max_move)
             padded_chosen_move = chosen_move+num_moves
-            
+
             # Extract moves
             padded_boards = np.concatenate((np.zeros((m, n, n)), boards), axis=0)
             

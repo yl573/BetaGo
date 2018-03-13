@@ -63,7 +63,9 @@ class MCTS:
         P, _ = self.model.eval(boards, player)
         return MCTNode(boards, P, player)
 
-    def search_for_pi(self, iterations=10, temp=1):
+    def search_for_pi(self, iterations=10, temp=1, model=None):
+        if model:
+            self.model = model
         for i in range(iterations):
             self._search(self.root)
         # print('P: ', self.root.P)
@@ -72,9 +74,20 @@ class MCTS:
 
     def set_move(self, move):
         new_root = self.root.find_child(move)
-        if new_root is None:
-            raise ValueError("Invalid move")
+        if new_root is None:   
+            self.game.set_board_from_prev_boards(self.root.boards, self.root.player)  
+            board, next_player = self._execute_move(move)
+            new_boards = update_boards(self.root.boards, board)
+            P, V = self.model.eval(new_boards, next_player)
+            new_root = MCTNode(new_boards, P, next_player)
         self.root = new_root
+
+    def _execute_move(self, move):
+        if move == self.n**2: # this is the pass move
+            return self.game.pass_move()
+        else:
+            y, x = divmod(move, self.n)
+            return self.game.play(x, y)
 
     def _search(self, node):
         self.game.set_board_from_prev_boards(node.boards, node.player)
@@ -98,12 +111,7 @@ class MCTS:
         if child is not None:
             V = self._search(child)
         else:
-            if move == self.n**2: # this is the pass move
-                board, next_player = self.game.pass_move()
-            else:
-                y, x = divmod(move, self.n)
-                board, next_player = self.game.play(x, y)
-                
+            board, next_player = self._execute_move(move)
             new_boards = update_boards(node.boards, board)
             P, V = self.model.eval(new_boards, next_player)
             child = MCTNode(new_boards, P, next_player)
