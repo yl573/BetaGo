@@ -63,7 +63,9 @@ class MCTS:
         P, _ = self.model.eval(boards, player)
         return MCTNode(boards, P, player)
 
-    def search_for_pi(self, iterations=10, temp=1):
+    def search_for_pi(self, iterations=10, temp=1, model=None):
+        if model:
+            self.model = model
         for i in range(iterations):
             self._search(self.root)
         # print('P: ', self.root.P)
