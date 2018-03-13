@@ -25,7 +25,7 @@ class Data:
         self.model = model
         self.game_selfplay = Selfplay(model, self.start_player, self.size, self.input_moves)
 
-    def generate(self, num_samples=100, augment=False):
+    def generate(self, num_samples=100, augment=False, iters=15):
         # Prepare Variables
         model = self.model
         n = self.size
@@ -62,7 +62,7 @@ class Data:
             print (i)
             
             # Play one game
-            black_leads, boards, pi = self.game_selfplay.play_game()
+            black_leads, boards, pi = self.game_selfplay.play_game(iters)
             
             print ("Number of Moves: ", len(pi))
             

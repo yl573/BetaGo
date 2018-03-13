@@ -35,7 +35,7 @@ class Selfplay:
                 print(m, end='')
             print()
 
-    def play_game(self, iters=50):
+    def play_game(self, iters):
         n = self.n
         game = self.game
         player = self.player
@@ -55,7 +55,6 @@ class Selfplay:
 
         while True:
             pi = mcts.search_for_pi(iterations=iters)
-            print(pi)
             # self.maybe_print(pi)
 
             # Find position of next play that maximises pi

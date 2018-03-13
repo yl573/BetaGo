@@ -21,7 +21,7 @@ class Trainer:
             self.data.update_model(curr_model)
             
             training_set, pi_set, outcome_set = self.data.generate(num_samples, augment)
-            print (np.shape(training_set))
+            print(np.shape(training_set))
 
             curr_model.model.fit(training_set, [pi_set, outcome_set], epochs=epochs, batch_size=batch_size)
 

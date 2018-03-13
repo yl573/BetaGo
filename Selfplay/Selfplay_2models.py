@@ -79,6 +79,8 @@ class Selfplay_2models:
         ### --- Start game --- ###
 
 		while True:
+			self.maybe_print('---------------------------------\n')
+			self.maybe_print(game.board)
 			if turn_counter % 2 == 0:
 				pi, board, next_player, move, check_pass = self.makeMove(mcts1, player, game, check_pass, iters)
 				mcts1.set_move(move)
@@ -99,8 +101,7 @@ class Selfplay_2models:
 			player = next_player
 
 			game.set_board_from_prev_boards(boards, player)
-			self.maybe_print(game.board)
-			self.maybe_print('---------------------------------\n')
+			
 			black_lead = game.black_score_lead()
 
 			# Check win condition
