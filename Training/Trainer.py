@@ -14,21 +14,24 @@ class Trainer:
         print ("Initializing Trainer")
         self.data = Data(model, player=BLACK, size=size, input_moves=input_moves)
     
-    def train(self, training_steps, num_samples, epochs=3, batch_size=2):
+    def train(self, training_steps, num_samples, augment=False, epochs=3, batch_size=2):
         
         for i in range(training_steps):
             curr_model = self.best_model
             self.data.update_model(curr_model)
             
-            training_set, pi_set, black_leads_set = self.data.generate(num_samples)
+            training_set, pi_set, outcome_set = self.data.generate(num_samples, augment)
+            print (np.shape(training_set))
 
-            curr_model.model.fit(training_set, [pi_set, black_leads_set], epochs=epochs, batch_size=batch_size)
+            curr_model.model.fit(training_set, [pi_set, outcome_set], epochs=epochs, batch_size=batch_size)
 
             if self.evaluate_against_best(curr_model):
                 print ("New Model is better")
                 self.best_model = curr_model
             else:
-                print ("New Model not better")       
+                print ("New Model not better") 
+        
+            self.best_model.save('go_model_'+str(i)+'.h5')
         
     def evaluate_against_best(self, model):
         ###########

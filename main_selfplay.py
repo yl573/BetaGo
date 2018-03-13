@@ -15,8 +15,8 @@ game = GoSimulator(N)
 # Starting player
 player = BLACK 
 
-# model = Model(saved_path='model.h5', size=N, input_moves=n_input) if there is a saved model
-model = Model(size=N, input_moves=n_input)
+model = Model(saved_path='go_model.h5', size=N, input_moves=n_input) #if there is a saved model
+#model = Model(size=N, input_moves=n_input)
 game_selfplay = Selfplay(model, player, size=N, input_moves=n_input, verbose=1)
 
 black_score_allgames = []

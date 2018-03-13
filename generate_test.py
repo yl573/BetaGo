@@ -20,7 +20,10 @@ player = BLACK
 
 trainer = Data(model)
 
-trainingset, piset = trainer.generate(num_samples=10)
+trainingset, piset, outcomeset = trainer.generate(num_samples=12, augment=True)
 
 print (np.shape(trainingset))
 print (trainingset[-1])
+print (np.reshape(piset[:,:25], (12,5,5)))
+print ("OUTCOME")
+print (outcomeset)

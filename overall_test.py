@@ -4,17 +4,19 @@ from Shared.Consts import BLACK, WHITE
 from Training.Data import Data
 from Training.Trainer import Trainer
 
-from Model.model import Model
+from Model import Model
 
 import numpy as np
 
 # Set Constants
 SIZE = 5
-INPUT_MOVES = 3
+INPUT_MOVES = 4
+INPUT_MOVES_MODEL = 2
+
 PLAYER = BLACK
-NUM_SAMPLES = 6
-TRAINING_STEPS=4
-EPOCHS = 3
+NUM_SAMPLES = 10
+TRAINING_STEPS=15
+EPOCHS = 30
 BATCH_SIZE=2
 
 # Initialize Model
@@ -24,6 +26,6 @@ go_model = Model(SIZE, INPUT_MOVES)
 
 go_trainer = Trainer(go_model, SIZE, INPUT_MOVES)
 
-go_trainer.train(TRAINING_STEPS, NUM_SAMPLES, epochs=EPOCHS, batch_size=BATCH_SIZE)
+go_trainer.train(TRAINING_STEPS, NUM_SAMPLES, augment=False, epochs=EPOCHS, batch_size=BATCH_SIZE)
 
 print ("Done")
