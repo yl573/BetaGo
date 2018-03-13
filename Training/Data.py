@@ -10,75 +10,69 @@ import numpy as np
 
 class Data:
     
-    def __init__(self, model, player=BLACK, n=5, m=4):
+    def __init__(self, model, player=BLACK, size=5, input_moves=4):
         self.model = model
         self.start_player = player
-        self.n = n
-        self.m = m
-        
+        self.size = size
+        self.input_moves = input_moves
+       
         # Initialise Selfplay Class
-        self.game_selfplay = Selfplay(model, player)
+        self.game_selfplay = Selfplay(model, player, size, input_moves)
+    
+    def update_model(self, model):
+        self.model = model
 
-#     def SelfPlay(self):
-#         n = self.n
-#         m = self.m
-#         model = self.model
-        
-        
-#         #game_history = np.random.choice([-1,0,1], (30, n, n))
-#         game_history = np.zeros((15,n,n))
-        
-#         board = np.zeros((n,n))
-#         for i in range(15):
-#             es = np.where(board==0)
-#             rid = np.random.choice(np.shape(es)[-1])
-            
-#             if i%2==0:
-#                 board[es[0][rid], es[1][rid]] = 1
-#             else:
-#                 board[es[0][rid], es[1][rid]] = -1
-                
-#             game_history[i, :, :] = board
-        
-        
-#         outcome = np.random.choice([-1,0,1], 1)
-        
-#         # first entry in game_history should be first move, NOT empty board
-#         return game_history, outcome
-
-    def Generate(self, num_samples=50, augment=True):
-        
+    def generate(self, num_samples=50, augment=True):
+        # Prepare Variables
         model = self.model
-        n = self.n
-        m = self.m
+        n = self.size
+        m = self.input_moves
         num_moves = 2*m
+        curr_player = 0
         
+        # Prepare padding (given buffer comes from buffer from SelfPlay. Obsolete?)
+        given_buffer = 3
+        padding = np.zeros((num_moves-1-given_buffer, n, n))
         buffer = np.zeros((num_moves-1, n, n))
         
+        # Placeholders
         training_set = np.ones((num_samples, num_moves+1, n, n))
-
+        pi_set = np.ones((num_samples, n*n+1))
+        black_leads_set = np.ones((num_samples, 1))
+        
+        # Generate Training set
         for i in range(num_samples):
-
-            outcome, game_history = self.game_selfplay.playGame()
             
-            #print (np.shape(game_history))
+            # Play one game
+            black_leads, boards, pi = self.game_selfplay.play_game()
             
-            max_move = np.shape(game_history)[0]
+            print (boards[:6])
             
-            chosen_move = np.random.choice(max_move-2)+1
-            #chosen_move = max_move-1
+            # Determine length of game and pad boards
+            max_move = np.shape(boards)[0]
+            padded_boards = np.concatenate((padding, boards), axis=0)
             
-            sampled_moves_first = game_history[chosen_move:max([0, chosen_move-num_moves]):-1, :, :]
-            sampled_moves_second = buffer[:max([0,num_moves-chosen_move]), :, :] 
+            # Randomly choose a move
+            chosen_move = np.random.choice(max_move-given_buffer-1)
+            padded_chosen_move = chosen_move+num_moves-1
             
-            sampled_moves = np.concatenate((sampled_moves_first, sampled_moves_second), axis=0)
+            # Extract moves
+            sampled_moves = padded_boards[padded_chosen_move:padded_chosen_move-num_moves:-1, :, :]
             
-            outcome_array = outcome*np.ones((1, n,n))
+            # Determine current player
+            if chosen_move % 2 == 0:
+                curr_player = 1
+            else:
+                curr_player = 0
+            player_array = curr_player*np.ones((1, n,n))
             
-            sampled_set = np.concatenate((sampled_moves, outcome_array), axis=0)
+            # Concatenate current player with sampled moves
+            sampled_set = np.concatenate((sampled_moves, player_array), axis=0)
             
+            # Add values to placeholders
             training_set[i,:,:,:] = sampled_set
+            pi_set[i, :] = pi[chosen_move]
+            black_leads_set[i] = black_leads
+            # print (chosen_move)
         
-        #print ("CHOSEN: ",chosen_move,", MAX: ",max_move)
-        
-        return training_set
+        return training_set, pi_set, black_leads_set
