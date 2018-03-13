@@ -35,7 +35,7 @@ class Selfplay:
                 print(m, end='')
             print()
 
-    def play_game(self, iters):
+    def play_game(self, iters=50):
         n = self.n
         game = self.game
         player = self.player
@@ -47,7 +47,7 @@ class Selfplay:
 
         self.maybe_print('------------- START -------------\n')
 
-        turn_counter = 0
+        turn_counter = 2
         check_pass = 0
         mcts = MCTS(self.model, player, self.n, self.input_moves, start_boards=boards)
 

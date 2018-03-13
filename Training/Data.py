@@ -25,7 +25,7 @@ class Data:
         self.model = model
         self.game_selfplay = Selfplay(model, self.start_player, self.size, self.input_moves)
 
-    def generate(self, num_samples=100, augment=False, iters=15):
+    def generate(self, num_samples=100, augment=False):
         # Prepare Variables
         model = self.model
         n = self.size
@@ -62,7 +62,7 @@ class Data:
             print (i)
             
             # Play one game
-            black_leads, boards, pi = self.game_selfplay.play_game(iters)
+            black_leads, boards, pi = self.game_selfplay.play_game()
             
             print ("Number of Moves: ", len(pi))
             
@@ -71,12 +71,14 @@ class Data:
             
             # Randomly choose a move
             chosen_move = np.random.choice(max_move)
-            padded_chosen_move = chosen_move+num_moves
+            padded_chosen_move = chosen_move+num_moves-1
 
             # Extract moves
             padded_boards = np.concatenate((np.zeros((m, n, n)), boards), axis=0)
             
-            sampled_moves = padded_boards[padded_chosen_move:padded_chosen_move-num_moves:-1, :, :]
+            start_pad = padded_chosen_move-num_moves
+            
+            sampled_moves = padded_boards[padded_chosen_move:None if start_pad<0 else start_pad:-1, :, :]
             
             # Determine outcome wrt BLACK
             if black_leads != 0:
