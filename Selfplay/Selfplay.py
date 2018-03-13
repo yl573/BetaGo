@@ -47,7 +47,7 @@ class Selfplay:
 
         self.maybe_print('------------- START -------------\n')
 
-        turn_counter = 2
+        turn_counter = 0
         check_pass = 0
         mcts = MCTS(self.model, player, self.n, self.input_moves, start_boards=boards)
 
@@ -55,6 +55,7 @@ class Selfplay:
 
         while True:
             pi = mcts.search_for_pi(iterations=iters)
+            print(pi)
             # self.maybe_print(pi)
 
             # Find position of next play that maximises pi
