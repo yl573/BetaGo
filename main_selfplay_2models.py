@@ -15,7 +15,8 @@ game = GoSimulator(N)
 # Starting player
 player = BLACK 
 
-model1 = Model(saved_path='model.h5', size=N, input_moves=n_input) #if there is a saved model
+# model1 = Model(saved_path='model.h5', size=N, input_moves=n_input) #if there is a saved model
+model1 = Model(size=N, input_moves=n_input)
 model2 = Model(size=N, input_moves=n_input)
 game_selfplay = Selfplay_2models(model1, model2, player, size=N, input_moves=n_input, verbose=1)
 

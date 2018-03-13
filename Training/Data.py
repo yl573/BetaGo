@@ -53,8 +53,8 @@ class Data:
             padded_boards = np.concatenate((padding, boards), axis=0)
             
             # Randomly choose a move
-            chosen_move = np.random.choice(max_move-given_buffer-1)
-            padded_chosen_move = chosen_move+num_moves-1
+            chosen_move = np.random.choice(max_move - given_buffer - 1)
+            padded_chosen_move = chosen_move + num_moves - 1
             
             # Extract moves
             sampled_moves = padded_boards[padded_chosen_move:padded_chosen_move-num_moves:-1, :, :]

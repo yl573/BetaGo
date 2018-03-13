@@ -34,5 +34,5 @@ class Trainer:
         ###########
         return True
         
-    def generate_data(self, num_samples):
-        return self.trainer.Generate(num_samples)
+    # def generate_data(self, num_samples):
+    #     return self.trainer.Generate(num_samples)
