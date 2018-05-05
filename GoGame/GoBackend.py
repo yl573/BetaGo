@@ -117,17 +117,17 @@ def board_to_str(board):
 def find_move(board1, board2): 
     for i in range(len(board1)):
         if board1[i] == '.' and board2[i] != '.':
-            return i
-    return None
+            return i, board2[i]
+    return None, None
 
 def find_ko_from_boards(board1, board2):
-    move = find_move(board1, board2)
-    if not move:
+    move, color = find_move(board1, board2)
+    if move is None:
         return None
-    _, captured = maybe_capture_stones(board1, move)
-    if is_koish(board1, move) and len(captured) == 1:
-        return captured.pop()
-    return None
+    
+    pos = Position(board1, None)
+    pos = pos.play_move(move, color)
+    return pos.ko
 
 
 class Position(namedtuple('Position', ['board', 'ko'])):
@@ -142,25 +142,33 @@ class Position(namedtuple('Position', ['board', 'ko'])):
     def __str__(self):
         return board_to_str(self.board)
 
-    def print_illegal_move(self, fc):
+    def print_illegal_move(self, fc, ko):
         print('Original board:')
         print(self)
         print('Attempted position:')
         l = list(self.board)
         l[fc] = '#'
         print(board_to_str(''.join(l)))
+        if ko:
+            print('KO violated')
+        print()
         
 
     def get_legal_moves(self):
-        board = [1 if x==EMPTY else 0 for x in self.board ]
-        if self.ko:
-            board[self.ko] = 0
-        return board
+        board, ko = self
+        legal = [1 if x==EMPTY else 0 for x in board ]
+        if ko is not None:
+            legal[ko] = 0
+        return legal
+
+    def pass_move(self):
+        board, _ = self
+        return Position(board, None)
     
     def play_move(self, fc, color):
         board, ko = self
         if fc == ko or board[fc] != EMPTY:
-            self.print_illegal_move(fc)
+            self.print_illegal_move(fc, fc == ko)
             raise IllegalMove 
 
         possible_ko_color = is_koish(board, fc)

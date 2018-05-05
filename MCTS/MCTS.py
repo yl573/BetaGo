@@ -20,8 +20,10 @@ def score_to_win_prob(last_player, black_lead):
 
 class MCTNode:
 
-    def __init__(self, boards, P, player):
+    def __init__(self, boards, P, V, player, is_end=False):
         self.boards = boards
+        self.is_end = is_end
+        self.V = V
         m, n, _ = boards.shape
         self.N = np.zeros(n**2+1)
         self.W = np.zeros(n**2+1)
@@ -47,14 +49,6 @@ class MCTS:
         self.n = size
         self.root = self._create_root(start_boards, player)
 
-    # def print_tree(self, node=None):
-    #     print('MCTS Node')
-    #     if node is None:
-    #         node = self.root
-    #     print(node.boards)
-    #     for child in node.children:
-    #         self.print_tree(child)
-
     def _create_root(self, start_boards, player):
         if start_boards is not None:
             boards = start_boards
@@ -63,24 +57,26 @@ class MCTS:
         P, _ = self.model.eval(boards, player)
         return MCTNode(boards, P, player)
 
-    def search_for_pi(self, iterations=10, temp=1, model=None):
-        if model:
-            self.model = model
-        for i in range(iterations):
-            self._search(self.root)
-        # print('P: ', self.root.P)
-        pi = np.power(self.root.N, 1/temp) / np.sum(np.power(self.root.N, 1/temp))
-        return pi
+    def process_end_state(self):
+        P = np.zeros(26)
+        P[-1] = 1
+        black_lead = self.game.black_score_lead()
+        if black_lead == 0:
+            V = 0.5
+        elif next_player == BLACK:
+            V = black_lead > 0
+        else:
+            V = black_lead < 0
+        return P, V
 
-    def set_move(self, move):
-        new_root = self.root.find_child(move)
-        if new_root is None:   
-            self.game.set_board_from_prev_boards(self.root.boards, self.root.player)  
-            board, next_player = self._execute_move(move)
-            new_boards = update_boards(self.root.boards, board)
+    def _create_new_node(self, move):
+        board, next_player, end = self._execute_move(move)
+        new_boards = update_boards(self.root.boards, board)
+        if end:
+            P, V = self.process_end_state()
+        else:
             P, V = self.model.eval(new_boards, next_player)
-            new_root = MCTNode(new_boards, P, next_player)
-        self.root = new_root
+        return MCTNode(new_boards, P, V, next_player)
 
     def _execute_move(self, move):
         if move == self.n**2: # this is the pass move
@@ -88,6 +84,22 @@ class MCTS:
         else:
             y, x = divmod(move, self.n)
             return self.game.play(x, y)
+
+    def search_for_pi(self, iterations=10, temp=1, model=None):
+        if model:
+            self.model = model
+        for i in range(iterations):
+            self._search(self.root)
+        pi = np.power(self.root.N, 1/temp) / np.sum(np.power(self.root.N, 1/temp))
+        return pi
+
+    def set_move(self, move):
+        new_root = self.root.find_child(move)
+        if new_root is None:   
+            self.game.set_board_from_prev_boards(self.root.boards, self.root.player)  
+            new_root = self._create_new_node(move)
+
+        self.root = new_root
 
     def _search(self, node):
         self.game.set_board_from_prev_boards(node.boards, node.player)
@@ -108,14 +120,14 @@ class MCTS:
         assert legal[move] == 1
 
         child = node.find_child(move)
-        if child is not None:
-            V = self._search(child)
-        else:
-            board, next_player = self._execute_move(move)
-            new_boards = update_boards(node.boards, board)
-            P, V = self.model.eval(new_boards, next_player)
-            child = MCTNode(new_boards, P, next_player)
+        if child is None:
+            child = self._create_new_node(move)
             node.add_child(move, child)
+            V = child.V
+        elif child.is_end:
+            V = child.V
+        else:
+            V = self._search(child)
 
         node.W[move] += V
         node.N[move] += 1

@@ -6,7 +6,7 @@ from GoGame.GoSimulator import GoSimulator
 import random
 import time
 
-def addBoardtoBoards(board,boards,turn_counter):
+def addBoardtoBoards(board,boards):
     board_stack = board.reshape((1, *board.shape))
     new_boards = np.vstack((boards, board_stack))
     return new_boards
@@ -19,10 +19,11 @@ def print_winner(black_lead):
     else:
         print('The game is a draw')
 
+
 class Selfplay:
 
-    def __init__(self, model, player, size, input_moves, start_boards=None, verbose=0):
-        self.model = model
+    def __init__(self, agent1, agent2, player, size, input_moves, start_boards=None, verbose=0):
+        self.agents = [agent1, agent2]
         self.game = GoSimulator(size)
         self.player = player
         self.n = size
@@ -35,74 +36,50 @@ class Selfplay:
                 print(m, end='')
             print()
 
-    def play_game(self, iters=50):
+    def play_game(self, iters):
         n = self.n
         game = self.game
         player = self.player
-        boards = np.zeros([self.input_moves,n,n])
-        searched_pi = []
+        board_history = np.zeros([self.input_moves,n,n])
+        pi_history = []
+        agent_id = 0
 
-        game.set_board_from_prev_boards(boards, player)
+        game.set_board_from_prev_boards(board_history[-self.input_moves:], player)
+
         self.maybe_print(game.board)
-
         self.maybe_print('------------- START -------------\n')
 
-        turn_counter = 2
-        check_pass = 0
-        mcts = MCTS(self.model, player, self.n, self.input_moves, start_boards=boards)
-
-        ### --- Start game --- ###
-
         while True:
-            pi = mcts.search_for_pi(iterations=iters)
-            # self.maybe_print(pi)
 
-            # Find position of next play that maximises pi
-            move = np.random.choice(len(pi), p=pi)
-
-            # arg_pi_max = (np.argwhere(pi==np.max(pi)))
-            # arg_pi_max = arg_pi_max.flatten()
-
-            # arg_max = random.choice(arg_pi_max) # to deal with multiple maximums
-            # # self.maybe_print('arg_max ',arg_max)
+            agent = self.agents[agent_id]
+            agent_id = 1 - agent_id
+            move, pi = agent.select_move(
+                board_history[-self.input_moves:],
+                player
+            )
 
             if move == self.n**2: # PASS
                 self.maybe_print(player, ' PASSES \n')
-                board, next_player = game.pass_move()
-                check_pass = check_pass + 1
+                board, next_player, end_condition = game.pass_move()
 
             else:
                 move_y, move_x = divmod(move, self.n) # finds position of move on board and makes play
-                # self.maybe_print('Best move x:', move_x)
-                # self.maybe_print('Best move y:', move_y,'\n')
-                # Plays the best move
                 self.maybe_print(player, ' MOVES \n')
-                board, next_player = game.play(move_x,move_y)
-                check_pass = 0
+                board, next_player, end_condition = game.play(move_x,move_y)
 
-            mcts.set_move(move)
-            turn_counter = turn_counter + 1
-
-            # Add board to boards
-            boards = addBoardtoBoards(board,boards,turn_counter)
-            searched_pi.append(pi)
-            player = next_player
-
-            game.set_board_from_prev_boards(boards, player)
             self.maybe_print(game.board)
             self.maybe_print('---------------------------------\n')
-            black_lead = game.black_score_lead()
 
-            # Check win condition
-            if check_pass >=2:
-                self.maybe_print('GAME OVER FROM 2 PASSES')
-                break 
+            # Append history
+            board_history = addBoardtoBoards(board, board_history)
+            pi_history.append(pi)
+            player = next_player
 
-            if turn_counter == self.n**2 * 2:
-                self.maybe_print('GAME OVER FROM TURN LIMIT REACHED')
+            if end_condition:
+                self.maybe_print(end_condition)
                 break
 
         black_lead = game.black_score_lead()
         print_winner(black_lead)
         
-        return black_lead, boards, searched_pi
+        return black_lead, board_history, pi_history

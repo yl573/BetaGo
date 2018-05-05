@@ -5,10 +5,12 @@ from Shared.Functions import toggle_player
 
 class GoSimulator:
 
-    def __init__(self, N):
+    def __init__(self, N, ):
         GoBackend.set_size(N)
         self.N = N
         self.board = GoBackend.Position.initial_state()
+        self.num_turns = 0
+        self.num_passes = 0
 
     def _board_to_string(self, board):
         board_flat = board.reshape((self.N**2))
@@ -17,26 +19,38 @@ class GoSimulator:
 
 
     def set_board_from_prev_boards(self, prev_boards, next_player):
-        ko = GoBackend.find_ko_from_boards(
-            self._board_to_string(prev_boards[-2]), 
-            self._board_to_string(prev_boards[-1])
-        )
-        self.set_board(prev_boards[-1], next_player, ko_flat=ko) 
+        prev = self._board_to_string(prev_boards[-2])
+        curr = self._board_to_string(prev_boards[-1])
+        ko = GoBackend.find_ko_from_boards(prev, curr)
+        self.num_passes = int(prev == curr)
+        self.num_turns = len(prev_boards)
+        self.set_board(prev_boards[-1], next_player, ko=ko) 
 
 
-    def set_board(self, board, next_player, ko_flat=None):
+    def set_board(self, board, next_player, ko=None):
         board_str = self._board_to_string(board)
-        self.board = GoBackend.Position.set_board(board=board_str,ko=ko_flat)
+        self.board = GoBackend.Position.set_board(board=board_str,ko=ko)
         self.current_player = next_player
 
     def play(self, x, y):
         self.board = self.board.play_move(y*self.N+x, self.current_player)
         self.current_player = toggle_player(self.current_player)
-        return (self.as_array(), self.current_player)
+        self.num_turns += 1
+        self.num_passes = 0
+        end_condition = None
+        if self.num_turns == self.N**2 * 2:
+            end_condition = 'GAME OVER FROM TURN LIMIT REACHED (%s turns)' % self.num_turns
+        return (self.as_array(), self.current_player, end_condition)
 
     def pass_move(self):
+        self.board = self.board.pass_move()
         self.current_player = toggle_player(self.current_player)
-        return (self.as_array(), self.current_player)
+        self.num_turns += 1
+        self.num_passes += 1
+        end_condition = None
+        if self.num_passes == 2:
+             end_condition = 'GAME OVER FROM 2 PASSES'
+        return (self.as_array(), self.current_player, end_condition)
 
     def as_array(self):
         char_list = list(self.board.board)

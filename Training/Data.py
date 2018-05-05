@@ -62,7 +62,7 @@ class Data:
             print (i)
             
             # Play one game
-            black_leads, boards, pi = self.game_selfplay.play_game()
+            black_leads, boards, pi = self.game_selfplay.play_game(i)
             
             print ("Number of Moves: ", len(pi))
             
