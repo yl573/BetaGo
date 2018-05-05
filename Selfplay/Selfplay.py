@@ -36,7 +36,7 @@ class Selfplay:
                 print(m, end='')
             print()
 
-    def play_game(self, iters):
+    def play_game(self):
         n = self.n
         game = self.game
         player = self.player
@@ -44,15 +44,15 @@ class Selfplay:
         pi_history = []
         agent_id = 0
 
-        game.set_board_from_prev_boards(board_history[-self.input_moves:], player)
+        game.set_board(board_history[-1], player, None)
 
-        self.maybe_print(game.board)
         self.maybe_print('------------- START -------------\n')
 
         while True:
 
             agent = self.agents[agent_id]
             agent_id = 1 - agent_id
+
             move, pi = agent.select_move(
                 board_history[-self.input_moves:],
                 player
@@ -82,4 +82,4 @@ class Selfplay:
         black_lead = game.black_score_lead()
         print_winner(black_lead)
         
-        return black_lead, board_history, pi_history
+        return black_lead, board_history[self.input_moves:], pi_history

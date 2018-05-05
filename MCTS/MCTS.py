@@ -54,10 +54,10 @@ class MCTS:
             boards = start_boards
         else:
             boards = np.zeros((self.m, self.n, self.n))
-        P, _ = self.model.eval(boards, player)
-        return MCTNode(boards, P, player)
+        P, V = self.model.eval(boards, player)
+        return MCTNode(boards, P, V, player)
 
-    def process_end_state(self):
+    def process_end_state(self, next_player):
         P = np.zeros(26)
         P[-1] = 1
         black_lead = self.game.black_score_lead()
@@ -73,7 +73,7 @@ class MCTS:
         board, next_player, end = self._execute_move(move)
         new_boards = update_boards(self.root.boards, board)
         if end:
-            P, V = self.process_end_state()
+            P, V = self.process_end_state(next_player)
         else:
             P, V = self.model.eval(new_boards, next_player)
         return MCTNode(new_boards, P, V, next_player)
@@ -85,7 +85,7 @@ class MCTS:
             y, x = divmod(move, self.n)
             return self.game.play(x, y)
 
-    def search_for_pi(self, iterations=10, temp=1, model=None):
+    def search_for_pi(self, iterations, temp=1, model=None):
         if model:
             self.model = model
         for i in range(iterations):

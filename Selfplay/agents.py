@@ -1,20 +1,32 @@
 
 from MCTS import MCTS
 from Shared.Functions import toggle_player
-from GoGame.GoSimulator import GoSimulator
+from GoGame.GoSimulator import GoSimulator, board_to_string
+from GoGame.GoBackend import find_move
 import numpy as np
 import random
 
-
-# class Agent:
-
-
 class MCTSAgent:
-    def __init__(self, model, player, size, input_moves, start_boards):
+    
+    def __init__(self, model, player, size, input_moves, search_iters=50, start_boards=None):
+
+        self.size = size
+        self.iters = search_iters
+        if not start_boards:
+            start_boards = np.zeros([input_moves,size,size])
         self.mcts = MCTS(model, player, size, input_moves, start_boards=start_boards)
 
-    def select_move(self, boards, player):
-        pi = self.mcts.search_for_pi(iterations=iters)
+    def select_move(self, boards, player): 
+
+        move, color = find_move(
+            board_to_string(boards[-2]), 
+            board_to_string(boards[-1])
+        )
+        if move is None:
+            move = self.size**2
+
+        self.mcts.set_move(move)
+        pi = self.mcts.search_for_pi(iterations=self.iters)
         # Find position of next play that maximises pi
         move = np.random.choice(len(pi), p=pi)
         self.mcts.set_move(move)

@@ -1,4 +1,5 @@
 import itertools
+import numpy as np
 from collections import namedtuple
 from Shared.Consts import WHITE, BLACK, EMPTY
 
@@ -114,7 +115,7 @@ def board_to_str(board):
         s += '\n'
     return s
 
-def find_move(board1, board2): 
+def find_move(board1, board2): # return position and color
     for i in range(len(board1)):
         if board1[i] == '.' and board2[i] != '.':
             return i, board2[i]

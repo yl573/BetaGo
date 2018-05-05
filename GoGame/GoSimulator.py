@@ -3,32 +3,31 @@ import numpy as np
 from Shared.Consts import WHITE, BLACK, EMPTY, num_to_char, char_to_num
 from Shared.Functions import toggle_player
 
+def board_to_string(board):
+    l = board.shape[1]**2
+    board_flat = board.reshape((l))
+    board_str = ''.join(list((map(lambda x: num_to_char[x], board_flat))))
+    return board_str
+
 class GoSimulator:
 
-    def __init__(self, N, ):
+    def __init__(self, N):
         GoBackend.set_size(N)
         self.N = N
         self.board = GoBackend.Position.initial_state()
         self.num_turns = 0
         self.num_passes = 0
 
-    def _board_to_string(self, board):
-        board_flat = board.reshape((self.N**2))
-        board_str = ''.join(list((map(lambda x: num_to_char[x], board_flat))))
-        return board_str
-
-
     def set_board_from_prev_boards(self, prev_boards, next_player):
-        prev = self._board_to_string(prev_boards[-2])
-        curr = self._board_to_string(prev_boards[-1])
+        prev = board_to_string(prev_boards[-2])
+        curr = board_to_string(prev_boards[-1])
         ko = GoBackend.find_ko_from_boards(prev, curr)
         self.num_passes = int(prev == curr)
         self.num_turns = len(prev_boards)
         self.set_board(prev_boards[-1], next_player, ko=ko) 
 
-
     def set_board(self, board, next_player, ko=None):
-        board_str = self._board_to_string(board)
+        board_str = board_to_string(board)
         self.board = GoBackend.Position.set_board(board=board_str,ko=ko)
         self.current_player = next_player
 
