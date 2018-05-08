@@ -32,4 +32,3 @@ print(len(pi_history))
 
 print('Time taken (secs): ', t1 - t0)
 print('Number of moves: ', len(board_history))
-
