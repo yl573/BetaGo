@@ -22,13 +22,12 @@ def print_winner(black_lead):
 
 class Selfplay:
 
-    def __init__(self, agent1, agent2, player, size, input_moves, start_boards=None, verbose=0):
+    def __init__(self, agent1, agent2, player, size, verbose=0):
         self.agents = [agent1, agent2]
         self.game = GoSimulator(size)
         self.player = player
         self.n = size
         self.verbose = verbose
-        self.input_moves = input_moves
 
     def maybe_print(self, *msg):
         if self.verbose:
@@ -40,9 +39,11 @@ class Selfplay:
         n = self.n
         game = self.game
         player = self.player
-        board_history = np.zeros([self.input_moves,n,n])
+        board_history = np.zeros([1, n, n])
         pi_history = []
         agent_id = 0
+        for agent in self.agents:
+            agent.reset()
 
         game.set_board(board_history[-1], player, None)
 
@@ -54,7 +55,7 @@ class Selfplay:
             agent_id = 1 - agent_id
 
             move, pi = agent.select_move(
-                board_history[-self.input_moves:],
+                board_history,
                 player
             )
 
@@ -82,4 +83,4 @@ class Selfplay:
         black_lead = game.black_score_lead()
         print_winner(black_lead)
         
-        return black_lead, board_history[self.input_moves:], pi_history
+        return black_lead, board_history, pi_history

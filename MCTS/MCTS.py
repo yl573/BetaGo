@@ -1,33 +1,33 @@
 import numpy as np
-from GoGame.GoSimulator import GoSimulator
+import math
+from GoGame.GoSimulator import GoSimulator, board_to_string
+from GoGame.GoBackend import find_move
 from Shared.Consts import BLACK, WHITE
 from Shared.Functions import toggle_player
-import math
+from .Tree import print_tree
 
-def calc_U(P, N, cpuct=1):
-    N_sum = np.sum(N)
-    return cpuct * P * np.sqrt(N_sum) / (1 + N)
 
 def update_boards(boards, new_board):
     new_boards = np.delete(boards, 0, axis=0)
     new_board = np.array([new_board])
     return np.concatenate((new_boards, new_board))
 
+
 def score_to_win_prob(last_player, black_lead):
     if black_lead == 0:
         return 0.5
     return 1 * (not (black_lead > 0) ^ (last_player == BLACK))
 
-class MCTNode:
 
+class MCTNode:
     def __init__(self, boards, P, V, player, is_end=False):
         self.boards = boards
         self.is_end = is_end
         self.V = V
         m, n, _ = boards.shape
-        self.N = np.zeros(n**2+1)
-        self.W = np.zeros(n**2+1)
-        self.Q = np.zeros(n**2+1)
+        self.N = np.zeros(n**2 + 1)
+        self.W = np.zeros(n**2 + 1)
+        self.Q = np.zeros(n**2 + 1)
         self.P = P
         self.player = player
         self.children = {}
@@ -41,79 +41,107 @@ class MCTNode:
         self.children[str(move)] = child
 
 
-class MCTS:
-    def __init__(self, model, player, size, input_moves, start_boards=None):
-        self.model = model
-        self.game = GoSimulator(size)
-        self.m = size
-        self.n = size
-        self.root = self._create_root(start_boards, player)
+game = GoSimulator(5)
 
-    def _create_root(self, start_boards, player):
-        if start_boards is not None:
-            boards = start_boards
+
+def simulate_move(boards, player, move):
+    game.set_board_from_prev_boards(boards, player)
+    n = boards.shape[1]
+    if move == n**2:  # this is the pass move
+        return game.pass_move()
+    else:
+        y, x = divmod(move, n)
+        return game.play(x, y)
+
+
+def process_end_state(boards, player):
+    game.set_board_from_prev_boards(boards, player)
+    black_lead = game.black_score_lead()
+    if black_lead == 0:
+        V = 0.5
+    elif player == BLACK:
+        V = black_lead > 0
+    else:
+        V = black_lead < 0
+    P = np.zeros(26)
+    return P, V
+
+
+def get_legal(boards, player):
+    game.set_board_from_prev_boards(boards, player)
+    legal = game.get_legal_moves().flatten()
+    legal = np.append(legal, 1)
+    return legal
+
+
+def find_last_two_moves(boards):
+    move1, _ = find_move(
+        board_to_string(boards[-3]), board_to_string(boards[-2]))
+    if move1 is None:
+        move1 = self.size**2
+    move2, _ = find_move(
+        board_to_string(boards[-2]), board_to_string(boards[-1]))
+    if move2 is None:
+        move2 = self.size**2
+    return move1, move2
+
+
+class MCTS:
+    def __init__(self, model, player, size, n_input):
+        self.model = model
+        self.n_input = n_input
+        self.size = size
+        self.root = None
+        game = GoSimulator(self.size)
+
+    def create_node(self, boards, player, end):
+        if end:
+            P, V = process_end_state(boards, player)
         else:
-            boards = np.zeros((self.m, self.n, self.n))
-        P, V = self.model.eval(boards, player)
+            P, V = self.model.eval(boards, player)
         return MCTNode(boards, P, V, player)
 
-    def process_end_state(self, next_player):
-        P = np.zeros(26)
-        P[-1] = 1
-        black_lead = self.game.black_score_lead()
-        if black_lead == 0:
-            V = 0.5
-        elif next_player == BLACK:
-            V = black_lead > 0
-        else:
-            V = black_lead < 0
-        return P, V
+    def print_tree(self):
+        print_tree(self.root)
 
-    def _create_new_node(self, move):
-        board, next_player, end = self._execute_move(move)
-        new_boards = update_boards(self.root.boards, board)
-        if end:
-            P, V = self.process_end_state(next_player)
-        else:
-            P, V = self.model.eval(new_boards, next_player)
-        return MCTNode(new_boards, P, V, next_player)
+    def search_for_pi(self, boards, player, iterations, temp=1):
+        assert boards.shape[0] == self.n_input
 
-    def _execute_move(self, move):
-        if move == self.n**2: # this is the pass move
-            return self.game.pass_move()
-        else:
-            y, x = divmod(move, self.n)
-            return self.game.play(x, y)
-
-    def search_for_pi(self, iterations, temp=1, model=None):
-        if model:
-            self.model = model
+        self.maybe_reuse_tree(boards, player)
         for i in range(iterations):
-            self._search(self.root)
-        pi = np.power(self.root.N, 1/temp) / np.sum(np.power(self.root.N, 1/temp))
+            self.search(self.root)
+        pi = np.power(self.root.N, 1 / temp) / np.sum(
+            np.power(self.root.N, 1 / temp))
         return pi
 
-    def set_move(self, move):
-        new_root = self.root.find_child(move)
-        if new_root is None:   
-            self.game.set_board_from_prev_boards(self.root.boards, self.root.player)  
-            new_root = self._create_new_node(move)
+    def maybe_find_new_root(self, boards, player):
+        if self.root is None:
+            return None
+        if (not np.array_equal(boards[-3], self.root.boards)) or (
+                player is not self.root.player):
+            return None
+        move1, move2 = find_last_two_moves(boards)
+        child = self.root.find_child(move1)
+        if child is not None:
+            grand_child = child.find_child(move2)
+            return grand_child
+        return None
 
+    def maybe_reuse_tree(self, boards, player):
+        new_root = self.maybe_find_new_root(boards, player)
+        if new_root is None:
+            new_root = self.create_node(boards, player, False)
         self.root = new_root
 
-    def _search(self, node):
-        self.game.set_board_from_prev_boards(node.boards, node.player)
+    def search(self, node):
 
-        legal = self.game.get_legal_moves().flatten()
-        legal = np.append(legal, 1)
-        
-        U = calc_U(node.P, node.N)
+        legal = get_legal(node.boards, node.player)
+        cpuct = 1
+        U = cpuct * node.P * np.sqrt(np.sum(node.N)) / (1 + node.N)
         score = (node.Q + U)
-        if np.sum(score) == 0: 
-            # if no moves have been played before
-            # pick a random position
-            score = np.random.uniform(size=(self.n**2+1))
-        
+        if np.sum(score) == 0:
+            score = np.random.uniform(size=(self.size**2 + 1))
+
         score[np.where(legal == 0)] = -np.inf
         move = np.argmax(score)
 
@@ -121,16 +149,19 @@ class MCTS:
 
         child = node.find_child(move)
         if child is None:
-            child = self._create_new_node(move)
+            next_board, next_player, end = simulate_move(
+                node.boards, node.player, move)
+            next_board = np.reshape(next_board, (1, self.size, self.size))
+            new_boards = np.vstack((node.boards[1:], next_board))
+            child = self.create_node(new_boards, next_player, end)
             node.add_child(move, child)
             V = child.V
         elif child.is_end:
             V = child.V
         else:
-            V = self._search(child)
+            V = self.search(child)
 
         node.W[move] += V
         node.N[move] += 1
-        node.Q[move] = node.W[move]/node.N[move]
+        node.Q[move] = node.W[move] / node.N[move]
         return V
-

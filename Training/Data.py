@@ -26,7 +26,7 @@ class Data:
 
     def update_model(self, model):
         self.model = model
-        self.game_selfplay = Selfplay(self.agent1, self.agent2, self.start_player, self.size, self.input_moves)
+        self.game_selfplay = Selfplay(self.agent1, self.agent2, self.start_player, self.size)
 
     def generate(self, num_samples=100, augment=False):
         # Prepare Variables
@@ -62,20 +62,21 @@ class Data:
                 i = j*4
             else:
                 i = j
-            print (i)
+            # print (i)
 
             # Play one game
             black_leads, boards, pi = self.game_selfplay.play_game()
 
+            print("Game ", j)
             print ("Number of Moves: ", len(pi), )
 
-            print (np.size(boards))
+            # print (np.size(boards))
             print ("..........")
 
             # Determine length of game and pad boards
             max_move = np.shape(pi)[0]
 
-            print ("max_move:", max_move)
+            # print ("max_move:", max_move)
 
             # Randomly choose a move
             chosen_move = np.random.choice(max_move)
@@ -103,9 +104,9 @@ class Data:
             # Concatenate current player with sampled moves
             sampled_set = np.concatenate((sampled_moves, player_array), axis=0)
 
-            print ("Chosen_move: ",chosen_move)
-            print ("")
-            print ("Sampled_set: ",np.shape(sampled_set))
+            # print ("Chosen_move: ",chosen_move)
+            # print ("")
+            # print ("Sampled_set: ",np.shape(sampled_set))
 
             # Add values to placeholders
             training_set[i,:,:,:] = sampled_set

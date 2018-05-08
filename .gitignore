@@ -3,3 +3,5 @@ __pycache__/
 .vscode/
 *.h5
 .DS_Store
+*.ipynb
+.ipynb_checkpoints/
