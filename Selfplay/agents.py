@@ -25,13 +25,6 @@ class MCTSAgent:
             self.size,
             self.input_moves)
 
-    def reset(self):
-        self.mcts = MCTS(
-            self.model,
-            self.player,
-            self.size,
-            self.input_moves)
-
     def select_move(self, boards, player):
         l = boards.shape[0]
         if self.input_moves > l:
@@ -57,6 +50,3 @@ class RandomAgent:
         pi = np.divide(pi, np.sum(pi))
         move = np.random.choice(len(pi), p=pi)
         return move, pi
-
-    def reset(self):
-        pass

@@ -28,11 +28,11 @@ t0 = time.time()
 black_lead, board_history, pi_history = game_selfplay.play_game()
 t1 = time.time()
 
-print(black_lead)
-print(board_history.shape)
-print(len(pi_history))
+# print(black_lead)
+# print(board_history.shape)
+# print(len(pi_history))
 
-agent1.mcts.print_tree()
+# agent1.mcts.print_tree()
 
 print('Time taken (secs): ', t1 - t0)
 print('Number of moves: ', len(board_history))

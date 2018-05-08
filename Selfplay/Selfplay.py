@@ -42,8 +42,6 @@ class Selfplay:
         board_history = np.zeros([1, n, n])
         pi_history = []
         agent_id = 0
-        for agent in self.agents:
-            agent.reset()
 
         game.set_board(board_history[-1], player, None)
 
