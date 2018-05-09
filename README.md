@@ -9,21 +9,15 @@ AlphaGo Zero uses end-to-end reinforcement learning to learn Go from scratch, wi
 
 ## Project Architecture
 
-* GoGame
-Go simulation code.
+* **GoGame**: Go simulation code.
 
-* MCTS
-Implmentation for Monte-carlo tree search.
+* **MCTS**: Implmentation for Monte-carlo tree search.
 
-* Model
-Neural network architecture
+* **Model**: Neural network architecture
 
-* Selfplay
-Module for managing the games between agents
+* **Selfplay**: Module for managing the games between agents
 
-* Shared
-Miscellaneous functions and constants
+* **Shared**: Miscellaneous functions and constants
 
-* Training
-Class for generating gameplay data and performing training and evaluation
+* **Training**: Class for generating gameplay data and performing training and evaluation
 
