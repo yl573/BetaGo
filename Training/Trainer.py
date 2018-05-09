@@ -3,25 +3,36 @@ from Selfplay import Selfplay
 from GoGame.GoSimulator import GoSimulator
 from Shared.Consts import BLACK, WHITE
 from .Data import Data
+import dill
 
 class Trainer:
-    def __init__(self, model, size, input_moves):
+    def __init__(self, model, size, input_moves, search_iters):
         self.size = size
         self.input_moves = input_moves
-        
         self.best_model = model
         
         print ("Initializing Trainer")
-        self.data = Data(model, player=BLACK, size=size, input_moves=input_moves)
+        self.data = Data(model, player=BLACK, size=size, input_moves=input_moves, search_iters=search_iters)
     
-    def train(self, training_steps, num_samples, augment=False, epochs=3, batch_size=2):
-        
+    def train(self, training_steps, num_samples, augment=False, epochs=3, batch_size=2, data_save_path=None):
+        data = {
+            'boards': [],
+            'pi': [],
+            'outcome': []
+        }
         for i in range(training_steps):
+
+            print('Iteration', i)
+
             curr_model = self.best_model
             self.data.update_model(curr_model)
             
             training_set, pi_set, outcome_set = self.data.generate(num_samples, augment)
-            print(np.shape(training_set))
+
+            if data_save_path is not None:
+                data['boards'].append(training_set)
+                data['pi'].append(pi_set)
+                data['outcome'].append(outcome_set)
 
             curr_model.model.fit(training_set, [pi_set, outcome_set], epochs=epochs, batch_size=batch_size)
 
@@ -32,6 +43,11 @@ class Trainer:
                 print ("New Model not better") 
         
             self.best_model.save('go_model_'+str(i)+'.h5')
+
+        if data_save_path is not None:
+            print('Saving to', data_save_path)
+            with open(data_save_path, "wb") as f:
+                dill.dump(data, f)
         
     def evaluate_against_best(self, model):
         ###########

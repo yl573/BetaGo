@@ -87,10 +87,12 @@ def find_last_two_moves(boards):
 
 
 class MCTS:
-    def __init__(self, model, player, size, n_input):
+    def __init__(self, model, player, size, n_input, cpuct, temp):
         self.model = model
         self.n_input = n_input
         self.size = size
+        self.cpuct = cpuct
+        self.temp = temp
         self.root = None
         game = GoSimulator(self.size)
 
@@ -104,14 +106,14 @@ class MCTS:
     def print_tree(self):
         print_tree(self.root)
 
-    def search_for_pi(self, boards, player, iterations, temp=1):
+    def search_for_pi(self, boards, player, iterations):
         assert boards.shape[0] == self.n_input
 
         self.maybe_reuse_tree(boards, player)
         for i in range(iterations):
             self.search(self.root)
-        pi = np.power(self.root.N, 1 / temp) / np.sum(
-            np.power(self.root.N, 1 / temp))
+        pi = np.power(self.root.N, 1 / self.temp) / np.sum(
+            np.power(self.root.N, 1 / self.temp))
         return pi
 
     def maybe_find_new_root(self, boards, player):
@@ -136,8 +138,7 @@ class MCTS:
     def search(self, node):
 
         legal = get_legal(node.boards, node.player)
-        cpuct = 1
-        U = cpuct * node.P * np.sqrt(np.sum(node.N)) / (1 + node.N)
+        U = self.cpuct * node.P * np.sqrt(np.sum(node.N)) / (1 + node.N)
         score = (node.Q + U)
         if np.sum(score) == 0:
             score = np.random.uniform(size=(self.size**2 + 1))

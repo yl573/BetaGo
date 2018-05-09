@@ -2,37 +2,33 @@ from Selfplay import Selfplay, RandomAgent, MCTSAgent
 from Model import Model
 from GoGame.GoSimulator import GoSimulator
 from Shared.Consts import BLACK, WHITE
-from Shared.Functions import toggle_player
+from Shared.Functions import toggle_player, writer
 import time
-
+import sys
 import numpy as np
 
 N = 5
 n_input = 4
 player = BLACK
-model_file = 'go_model_0.h5'
+model_file = 'go_model_7.h5'
+
+sys.stdout = writer('out.log', sys.stdout)
 
 game = GoSimulator(N)
 
 model = Model(saved_path=model_file, size=N, input_moves=n_input)
-agent1 = MCTSAgent(model, player, N, n_input, search_iters=50)
+agent1 = MCTSAgent(model, player, N, n_input, 200, temp=1, cpuct=10)
 agent2 = RandomAgent() #MCTSAgent(model, toggle_player(player), N, n_input, search_iters=50)
 
-game_selfplay = Selfplay(agent1, agent2, BLACK, N, verbose=1)
+game_selfplay = Selfplay(agent1, agent2, BLACK, N, n_input)
 
 black_score_allgames = []
 boards_across_allgames = []
 
 
 t0 = time.time()
-black_lead, board_history, pi_history = game_selfplay.play_game()
+black_lead, board_history, pi_history = game_selfplay.play_game(print_tree=True, verbose=1)
 t1 = time.time()
-
-# print(black_lead)
-# print(board_history.shape)
-# print(len(pi_history))
-
-# agent1.mcts.print_tree()
 
 print('Time taken (secs): ', t1 - t0)
 print('Number of moves: ', len(board_history))

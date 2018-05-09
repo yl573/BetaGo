@@ -9,6 +9,13 @@ def DFS(root):
         children.append((str(move), DFS(root.children[move])))
     return OD(children)
 
+# def write_tree_to_file(root, file_name):
+#     x = DFS(root)
+#     tree = {'root': x}
+#     tr = LeftAligned()
+#     with open(file_name,'a') as f: 
+#         f.write('\n\n')
+#         f.write(tr(tree))
 
 def print_tree(root):
     x = DFS(root)

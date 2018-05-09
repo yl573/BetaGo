@@ -10,14 +10,14 @@ import numpy as np
 
 class Data:
 
-    def __init__(self, model, player=BLACK, size=5, input_moves=4):
-        print ( model.input_moves)
-        print (size, input_moves)
+    def __init__(self, model, player=BLACK, size=5, input_moves=4, search_iters=50):
+        # print ( model.input_moves)
+        # print (size, input_moves)
         self.model = model
         self.start_player = player
         self.size = size
         self.input_moves = input_moves
-        self.agent1 = MCTSAgent(model, player, size, input_moves, search_iters=50)
+        self.agent1 = MCTSAgent(model, player, size, input_moves, search_iters)
         #self.agent2 = MCTSAgent(model, player, size, input_moves, search_iters=50)
         self.agent2 = RandomAgent()
 
@@ -25,8 +25,7 @@ class Data:
         self.game_selfplay = Selfplay(self.agent1, self.agent2, player, size, input_moves)
 
     def update_model(self, model):
-        self.model = model
-        self.game_selfplay = Selfplay(self.agent1, self.agent2, self.start_player, self.size)
+        self.agent1.model = model
 
     def generate(self, num_samples=100, augment=False):
         # Prepare Variables
@@ -64,14 +63,13 @@ class Data:
                 i = j
             # print (i)
 
-            # Play one game
-            black_leads, boards, pi = self.game_selfplay.play_game()
-
             print("Game ", j)
-            print ("Number of Moves: ", len(pi), )
+            black_leads, boards, pi = self.game_selfplay.play_game()
+            print ("Number of Moves: ", len(pi))
+            print()
 
             # print (np.size(boards))
-            print ("..........")
+            # print ("..........")
 
             # Determine length of game and pad boards
             max_move = np.shape(pi)[0]
@@ -113,7 +111,7 @@ class Data:
             pi_set[i, :] = pi[chosen_move]
             outcome_set[i] = outcome
             # print (chosen_move)
-            print (np.shape(pi[chosen_move]))
+            # print (np.shape(pi[chosen_move]))
             #print (np.reshape(pi[chosen_move][0:25], (5,5)))
 
             if augment:
@@ -139,7 +137,7 @@ class Data:
                     training_set[i+kk+1,:,:,:] = sampled_aug[kk,:,:,:]
                     pi_set[i+kk+1,:] = pi_aug[kk,:]
                     outcome_set[i+kk+1] = outcome
-                    print (i+kk+1)
+                    # print (i+kk+1)
 
 
         return training_set, pi_set, outcome_set

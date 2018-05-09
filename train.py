@@ -21,16 +21,28 @@ INPUT_MOVES_MODEL = 2
 
 PLAYER = BLACK
 NUM_SAMPLES = 10
-TRAINING_STEPS=5
-EPOCHS = 2
-BATCH_SIZE=1
+TRAINING_STEPS = 15
+EPOCHS = 1
+BATCH_SIZE = 1
+SEARCH_ITERS = 100
+DATA_SAVE_PATH = 'Data.pkl'
 
 parser = argparse.ArgumentParser(description='''
     Train the BetaGo network''')
 
-parser.add_argument('-b', '--batch_size', action='store', type=int, default=BATCH_SIZE,
+parser.add_argument(
+    '-b',
+    '--batch_size',
+    action='store',
+    type=int,
+    default=BATCH_SIZE,
     help='''Batch size for training and validation''')
-parser.add_argument('-e', '--epochs', action='store', type=int, default=EPOCHS,
+parser.add_argument(
+    '-e',
+    '--epochs',
+    action='store',
+    type=int,
+    default=EPOCHS,
     help='''Number of iterations for which training will be performed''')
 
 args = parser.parse_args()
@@ -39,8 +51,14 @@ args = parser.parse_args()
 go_model = Model(SIZE, INPUT_MOVES)
 
 # Initialise Trainer
-go_trainer = Trainer(go_model, SIZE, INPUT_MOVES)
+go_trainer = Trainer(go_model, SIZE, INPUT_MOVES, SEARCH_ITERS)
 
-go_trainer.train(TRAINING_STEPS, NUM_SAMPLES, augment=False, epochs=args.epochs, batch_size=args.batch_size)
+go_trainer.train(
+    TRAINING_STEPS,
+    NUM_SAMPLES,
+    augment=False,
+    epochs=args.epochs,
+    batch_size=args.batch_size,
+    data_save_path=DATA_SAVE_PATH)
 
-print ("Done")
+print("Done")
