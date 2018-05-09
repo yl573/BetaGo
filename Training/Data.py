@@ -18,15 +18,15 @@ class Data:
         self.size = size
         self.input_moves = input_moves
         self.agent1 = MCTSAgent(model, player, size, input_moves, search_iters, cpuct)
-        self.agent2 = MCTSAgent(model, player, size, input_moves, search_iters, cpuct)
-        # self.agent2 = RandomAgent()
+        # self.agent2 = MCTSAgent(model, player, size, input_moves, search_iters, cpuct)
+        self.agent2 = RandomAgent()
 
         # Initialise Selfplay Class
         self.game_selfplay = Selfplay(self.agent1, self.agent2, player, size, input_moves)
 
     def update_model(self, model):
         self.agent1.model = model
-        self.agent2.model = model
+        # self.agent2.model = model
 
     def generate(self, num_samples=100, augment=False):
         # Prepare Variables
