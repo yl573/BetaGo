@@ -6,13 +6,13 @@ from .Data import Data
 import dill
 
 class Trainer:
-    def __init__(self, model, size, input_moves, search_iters):
+    def __init__(self, model, size, input_moves, search_iters, cpuct):
         self.size = size
         self.input_moves = input_moves
         self.best_model = model
         
         print ("Initializing Trainer")
-        self.data = Data(model, player=BLACK, size=size, input_moves=input_moves, search_iters=search_iters)
+        self.data = Data(model, search_iters, cpuct, player=BLACK, size=size, input_moves=input_moves)
     
     def train(self, training_steps, num_samples, augment=False, epochs=3, batch_size=2, data_save_path=None):
         data = {

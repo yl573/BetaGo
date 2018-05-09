@@ -13,8 +13,9 @@ class MCTSAgent:
                  size,
                  input_moves,
                  search_iters,
-                 temp=1,
-                 cpuct=1):
+                 cpuct,
+                 temp=1
+                 ):
 
         self.size = size
         self.iters = search_iters

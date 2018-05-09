@@ -10,16 +10,16 @@ import numpy as np
 
 class Data:
 
-    def __init__(self, model, player=BLACK, size=5, input_moves=4, search_iters=50):
+    def __init__(self, model, search_iters, cpuct, player=BLACK, size=5, input_moves=4):
         # print ( model.input_moves)
         # print (size, input_moves)
         self.model = model
         self.start_player = player
         self.size = size
         self.input_moves = input_moves
-        self.agent1 = MCTSAgent(model, player, size, input_moves, search_iters)
-        #self.agent2 = MCTSAgent(model, player, size, input_moves, search_iters=50)
-        self.agent2 = RandomAgent()
+        self.agent1 = MCTSAgent(model, player, size, input_moves, search_iters, cpuct)
+        self.agent2 = MCTSAgent(model, player, size, input_moves, search_iters, cpuct)
+        # self.agent2 = RandomAgent()
 
         # Initialise Selfplay Class
         self.game_selfplay = Selfplay(self.agent1, self.agent2, player, size, input_moves)

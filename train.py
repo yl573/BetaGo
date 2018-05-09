@@ -21,10 +21,11 @@ INPUT_MOVES_MODEL = 2
 
 PLAYER = BLACK
 NUM_SAMPLES = 10
-TRAINING_STEPS = 15
+TRAINING_STEPS = 10
 EPOCHS = 1
 BATCH_SIZE = 1
-SEARCH_ITERS = 100
+SEARCH_ITERS = 50
+CPUCT = 20
 DATA_SAVE_PATH = 'Data.pkl'
 
 parser = argparse.ArgumentParser(description='''
@@ -51,7 +52,7 @@ args = parser.parse_args()
 go_model = Model(SIZE, INPUT_MOVES)
 
 # Initialise Trainer
-go_trainer = Trainer(go_model, SIZE, INPUT_MOVES, SEARCH_ITERS)
+go_trainer = Trainer(go_model, SIZE, INPUT_MOVES, SEARCH_ITERS, CPUCT)
 
 go_trainer.train(
     TRAINING_STEPS,
