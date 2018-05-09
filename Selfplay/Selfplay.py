@@ -48,7 +48,7 @@ class Selfplay:
 
         self.maybe_print('------------- START -------------\n')
 
-        while True:
+        for step in range(self.n**2 * 2):
 
             agent = self.agents[agent_id]
             agent_id = 1 - agent_id
