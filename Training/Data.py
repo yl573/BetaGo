@@ -26,6 +26,7 @@ class Data:
 
     def update_model(self, model):
         self.agent1.model = model
+        self.agent2.model = model
 
     def generate(self, num_samples=100, augment=False):
         # Prepare Variables
