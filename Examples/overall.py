@@ -1,7 +1,7 @@
 from Selfplay import Selfplay
 from GoGame.GoSimulator import GoSimulator
 from Shared.Consts import BLACK, WHITE
-from Training.Data import Data
+from Training.DataGenerator import DataGenerator
 
 from Model.model import Model
 
@@ -17,11 +17,11 @@ NUM_SAMPLES = 100
 go_model = Model(SIZE, INPUT_MOVES)
 
 # Initialize Trainer
-data = Data(go_model, player=PLAYER, size=SIZE, input_moves=INPUT_MOVES)
+data_generator = DataGenerator(go_model, player=PLAYER, size=SIZE, input_moves=INPUT_MOVES)
 
 # Generate 100 number of samples
 print ("Generating Sample Games")
-training_set, pi_set, black_leads_set = data.generate(num_samples=6)
+training_set, pi_set, black_leads_set = data_generator.generate(num_samples=6)
 
 print ("Fitting Model")
 go_model.model.fit(training_set, [pi_set, black_leads_set], epochs=1, batch_size=2)
