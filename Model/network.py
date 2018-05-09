@@ -35,6 +35,27 @@ def load_network(file_path):
     return load_model(file_path, custom_objects={'policy_loss': policy_loss})
 
 
+def get_simple_network(input_moves, N):
+    inp = Input((2*input_moves+1,N,N))
+
+    # input convolution
+    y = Conv2D(16, (3, 3), padding='same', kernel_regularizer=reg)(inp)
+    y = BatchNormalization()(y)
+    y = Activation('relu')(y)
+
+    y = Flatten()(y)
+
+    # policy
+    policy_out = Dense(N**2+1, activation='softmax', name='policyout', kernel_regularizer=reg)(y)
+
+    # value
+    y_value = Dense(8, activation='relu', kernel_regularizer=reg)(y)
+    value_out = Dense(1, activation='tanh', name='valueout', kernel_regularizer=reg)(y_value)
+
+    model = Model(inp, [policy_out,value_out])
+    model.compile(loss=[policy_loss, 'mse'], optimizer='adam')
+    return model
+
 def get_network(input_moves, N):
     # this is the actual model for BetaGo
     inp = Input((2*input_moves+1,N,N))
