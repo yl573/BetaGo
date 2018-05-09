@@ -9,7 +9,7 @@ from GoGame.GoSimulator import GoSimulator
 from Shared.Consts import BLACK, WHITE
 import time
 
-from Training.Data import Data
+from Training.DataGenerator import DataGenerator
 from Training.Trainer import Trainer
 
 import numpy as np
