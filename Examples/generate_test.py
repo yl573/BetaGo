@@ -1,7 +1,7 @@
 from Selfplay import Selfplay
 from GoGame.GoSimulator import GoSimulator
 from Shared.Consts import BLACK, WHITE
-from Training.Data import Data
+from Training.DataGenerator import DataGenerator
 
 import numpy as np
 
@@ -18,7 +18,7 @@ class Model:
 model = Model(5, 4)
 player = BLACK 
 
-trainer = Data(model)
+trainer = DataGenerator(model)
 
 trainingset, piset, outcomeset = trainer.generate(num_samples=12, augment=True)
 

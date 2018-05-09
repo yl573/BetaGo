@@ -8,7 +8,7 @@ from Shared.Consts import BLACK, WHITE
 
 import numpy as np
 
-class Data:
+class DataGenerator:
 
     def __init__(self, model, search_iters, cpuct, player=BLACK, size=5, input_moves=4):
         # print ( model.input_moves)

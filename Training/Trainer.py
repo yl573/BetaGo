@@ -2,7 +2,7 @@ import numpy as np
 from Selfplay import Selfplay
 from GoGame.GoSimulator import GoSimulator
 from Shared.Consts import BLACK, WHITE
-from .Data import Data
+from .DataGenerator import DataGenerator
 import dill
 
 class Trainer:
@@ -12,7 +12,7 @@ class Trainer:
         self.best_model = model
         
         print ("Initializing Trainer")
-        self.data = Data(model, search_iters, cpuct, player=BLACK, size=size, input_moves=input_moves)
+        self.data_generator = DataGenerator(model, search_iters, cpuct, player=BLACK, size=size, input_moves=input_moves)
     
     def train(self, training_steps, num_samples, augment=False, epochs=3, batch_size=2, data_save_path=None):
         data = {
@@ -25,9 +25,9 @@ class Trainer:
             print('Iteration', i)
 
             curr_model = self.best_model
-            self.data.update_model(curr_model)
+            self.data_generator.update_model(curr_model)
             
-            training_set, pi_set, outcome_set = self.data.generate(num_samples, augment)
+            training_set, pi_set, outcome_set = self.data_generator.generate(num_samples, augment)
 
             if data_save_path is not None:
                 data['boards'].append(training_set)

@@ -1,7 +1,7 @@
 from Selfplay import Selfplay
 from GoGame.GoSimulator import GoSimulator
 from Shared.Consts import BLACK, WHITE
-from Training.Data import Data
+from Training.DataGenerator import DataGenerator
 from Training.Trainer import Trainer
 
 from Model import Model
