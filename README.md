@@ -21,3 +21,14 @@ AlphaGo Zero uses end-to-end reinforcement learning to learn Go from scratch, wi
 
 * **Training**: Class for generating gameplay data and performing training and evaluation
 
+## To Run
+
+Generate games and train the model:
+```python
+python3 train.py
+```
+
+Test a trained model:
+```python
+python3 test.py
+```
