@@ -20,13 +20,13 @@ INPUT_MOVES = 4
 INPUT_MOVES_MODEL = 2
 
 PLAYER = BLACK
-NUM_SAMPLES = 10
-TRAINING_STEPS = 10
+NUM_GAMES = 1
+TRAINING_STEPS = 1
 EPOCHS = 1
 BATCH_SIZE = 1
 SEARCH_ITERS = 50
 CPUCT = 20
-DATA_SAVE_PATH = 'Data.pkl'
+DATA_SAVE_PATH = 'data.pkl'
 
 parser = argparse.ArgumentParser(description='''
     Train the BetaGo network''')
@@ -56,7 +56,7 @@ go_trainer = Trainer(go_model, SIZE, INPUT_MOVES, SEARCH_ITERS, CPUCT)
 
 go_trainer.train(
     TRAINING_STEPS,
-    NUM_SAMPLES,
+    NUM_GAMES,
     augment=False,
     epochs=args.epochs,
     batch_size=args.batch_size,

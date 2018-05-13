@@ -17,7 +17,7 @@ sys.stdout = writer('out.log', sys.stdout)
 game = GoSimulator(N)
 
 model = Model(saved_path=model_file, size=N, input_moves=n_input)
-agent1 = MCTSAgent(model, player, N, n_input, 200, temp=1, cpuct=10)
+agent1 = MCTSAgent(model, player, N, n_input, 200, temp=1, cpuct=60)
 agent2 = RandomAgent() #MCTSAgent(model, toggle_player(player), N, n_input, search_iters=50)
 
 game_selfplay = Selfplay(agent1, agent2, BLACK, N, n_input)
@@ -27,7 +27,7 @@ boards_across_allgames = []
 
 
 t0 = time.time()
-black_lead, board_history, pi_history = game_selfplay.play_game(print_tree=True, verbose=1)
+black_lead, board_history, pi_history, _ = game_selfplay.play_game(print_tree=True, verbose=1)
 t1 = time.time()
 
 print('Time taken (secs): ', t1 - t0)

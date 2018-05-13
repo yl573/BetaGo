@@ -14,11 +14,12 @@ class Trainer:
         print ("Initializing Trainer")
         self.data_generator = DataGenerator(model, search_iters, cpuct, player=BLACK, size=size, input_moves=input_moves)
     
-    def train(self, training_steps, num_samples, augment=False, epochs=3, batch_size=2, data_save_path=None):
+    def train(self, training_steps, num_games, augment=False, epochs=3, batch_size=2, data_save_path=None):
         data = {
             'boards': [],
             'pi': [],
-            'outcome': []
+            'outcome': [],
+            'player': []
         }
         for i in range(training_steps):
 
@@ -27,14 +28,15 @@ class Trainer:
             curr_model = self.best_model
             self.data_generator.update_model(curr_model)
             
-            training_set, pi_set, outcome_set = self.data_generator.generate(num_samples, augment)
+            boards, pi, outcome, player = self.data_generator.generate(num_games, augment)
 
             if data_save_path is not None:
-                data['boards'].append(training_set)
-                data['pi'].append(pi_set)
-                data['outcome'].append(outcome_set)
+                data['boards'].append(boards)
+                data['pi'].append(pi)
+                data['outcome'].append(outcome)
+                data['player'].append(player)
 
-            curr_model.model.fit(training_set, [pi_set, outcome_set], epochs=epochs, batch_size=batch_size)
+            curr_model.fit(boards, pi, outcome, player)
 
             if self.evaluate_against_best(curr_model):
                 print ("New Model is better")

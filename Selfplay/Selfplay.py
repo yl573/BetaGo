@@ -41,6 +41,7 @@ class Selfplay:
         player = self.player
         board_history = np.zeros([1, n, n])
         pi_history = []
+        player_history = []
         agent_id = 0
         self.verbose = verbose
 
@@ -59,6 +60,7 @@ class Selfplay:
                 player
             )
 
+
             if move == self.n**2: # PASS
                 self.maybe_print(player, ' PASSES \n')
                 board, next_player, end_condition = game.pass_move()
@@ -76,6 +78,7 @@ class Selfplay:
 
             # Append history
             board_history = addBoardtoBoards(board, board_history)
+            player_history.append(player)
             pi_history.append(pi)
             player = next_player
 
@@ -85,5 +88,8 @@ class Selfplay:
 
         black_lead = game.black_score_lead()
         print_winner(black_lead)
+        board_history = board_history[:-1]
+        pi_history = np.array(pi_history)
+        # to make lengths consistent, last boards doesn't trigger an action anyway
         
-        return black_lead, board_history, pi_history
+        return black_lead, board_history, pi_history, player_history
