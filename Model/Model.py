@@ -52,7 +52,7 @@ class Model:
     def save(self, file_path):
         self.model.save(file_path)
 
-    def fit(self, boards, pi, outcomes, players, epochs=1):
+    def fit(self, boards, pi, outcomes, players, epochs):
         assert len(boards) == len(pi) == len(outcomes) == len(players)
         assert boards.shape[1] == boards.shape[2] == self.size
 
@@ -61,7 +61,7 @@ class Model:
         with open('formatted.pkl', "wb") as f:
             dill.dump(formatted_boards, f)
 
-        self.model.fit(formatted_boards, [pi, outcomes])
+        self.model.fit(formatted_boards, [pi, outcomes], epochs=epochs)
                     
     def eval(self, boards, next_player):
         assert boards.shape[0] == self.n_in

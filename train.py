@@ -20,12 +20,12 @@ INPUT_MOVES = 4
 INPUT_MOVES_MODEL = 2
 
 PLAYER = BLACK
-NUM_GAMES = 1
-TRAINING_STEPS = 1
-EPOCHS = 1
+NUM_GAMES = 10
+TRAINING_STEPS = 5
+EPOCHS = 2
 BATCH_SIZE = 1
-SEARCH_ITERS = 50
-CPUCT = 20
+SEARCH_ITERS = 110
+CPUCT = 10
 DATA_SAVE_PATH = 'data.pkl'
 
 parser = argparse.ArgumentParser(description='''
@@ -58,7 +58,7 @@ go_trainer.train(
     TRAINING_STEPS,
     NUM_GAMES,
     augment=False,
-    epochs=args.epochs,
+    epochs=EPOCHS,
     batch_size=args.batch_size,
     data_save_path=DATA_SAVE_PATH)
 
