@@ -13,8 +13,7 @@ class MCTSAgent:
                  size,
                  input_moves,
                  search_iters,
-                 cpuct,
-                 temp=1
+                 cpuct
                  ):
 
         self.size = size
@@ -22,7 +21,7 @@ class MCTSAgent:
         self.model = model
         self.player = player
         self.input_moves = input_moves
-        self.mcts = MCTS(self.model, self.player, self.size, self.input_moves, temp, cpuct)
+        self.mcts = MCTS(self.model, self.player, self.size, self.input_moves, cpuct)
 
     def select_move(self, boards, player):
         l = boards.shape[0]

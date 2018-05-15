@@ -13,10 +13,10 @@ def update_boards(boards, new_board):
     return np.concatenate((new_boards, new_board))
 
 
-def score_to_win_prob(last_player, black_lead):
-    if black_lead == 0:
-        return 0.5
-    return 1 * (not (black_lead > 0) ^ (last_player == BLACK))
+# def score_to_win_prob(last_player, black_lead):
+#     if black_lead == 0:
+#         return 0.5
+#     return 1 * (not (black_lead > 0) ^ (last_player == BLACK))
 
 
 class MCTNode:
@@ -87,7 +87,7 @@ def find_last_two_moves(boards):
 
 
 class MCTS:
-    def __init__(self, model, player, size, n_input, cpuct, temp):
+    def __init__(self, model, player, size, n_input, cpuct, temp=1):
         self.model = model
         self.n_input = n_input
         self.size = size
@@ -108,9 +108,9 @@ class MCTS:
 
     def search_for_pi(self, boards, player, iterations):
         assert boards.shape[0] == self.n_input
-
         self.maybe_reuse_tree(boards, player)
         for i in range(iterations):
+            self.depth = 0
             self.search(self.root)
         pi = np.power(self.root.N, 1 / self.temp) / np.sum(
             np.power(self.root.N, 1 / self.temp))
@@ -133,10 +133,12 @@ class MCTS:
         new_root = self.maybe_find_new_root(boards, player)
         if new_root is None:
             new_root = self.create_node(boards, player, False)
+        else:
+            print('tree reused')
         self.root = new_root
 
     def search(self, node):
-
+        self.depth += 1
         legal = get_legal(node.boards, node.player)
         U = self.cpuct * node.P * np.sqrt(np.sum(node.N)) / (1 + node.N)
         score = (node.Q + U)
@@ -147,7 +149,6 @@ class MCTS:
         move = np.argmax(score)
 
         assert legal[move] == 1
-
         child = node.find_child(move)
         if child is None:
             next_board, next_player, end = simulate_move(
