@@ -1,1 +1,1 @@
-from .DataGenerator import *
+from .Trainer import Trainer

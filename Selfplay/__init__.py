@@ -1,2 +1,2 @@
 from .Selfplay import Selfplay
-from .agents import MCTSAgent, RandomAgent
+from .Agents import MCTSAgent, RandomAgent

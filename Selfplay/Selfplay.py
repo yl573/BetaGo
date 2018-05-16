@@ -22,7 +22,7 @@ def print_winner(black_lead):
 
 class Selfplay:
 
-    def __init__(self, agent1, agent2, player, size, n_input):
+    def __init__(self, agent1, agent2, player=BLACK, size=5, n_input=4):
         self.agents = [agent1, agent2]
         self.game = GoSimulator(size)
         self.player = player
@@ -87,7 +87,8 @@ class Selfplay:
                 break
 
         black_lead = game.black_score_lead()
-        print_winner(black_lead)
+        if self.verbose:
+            print_winner(black_lead)
         board_history = board_history[:-1]
         pi_history = np.array(pi_history)
         # to make lengths consistent, last boards doesn't trigger an action anyway
