@@ -1,4 +1,4 @@
-numpy==1.13.1
-dill==0.2.7.1
 asciitree==0.3.3
+dill==0.2.7.1
 Keras==2.0.8
+numpy==1.13.1

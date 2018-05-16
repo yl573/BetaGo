@@ -87,7 +87,7 @@ def find_last_two_moves(boards):
 
 
 class MCTS:
-    def __init__(self, model, player, size, n_input, cpuct, temp=1):
+    def __init__(self, model, player, size, n_input, cpuct, temp):
         self.model = model
         self.n_input = n_input
         self.size = size
