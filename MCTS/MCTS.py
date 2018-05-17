@@ -75,14 +75,15 @@ def get_legal(boards, player):
 
 
 def find_last_two_moves(boards):
+    size = boards.shape[1]
     move1, _ = find_move(
         board_to_string(boards[-3]), board_to_string(boards[-2]))
     if move1 is None:
-        move1 = self.size**2
+        move1 = size**2
     move2, _ = find_move(
         board_to_string(boards[-2]), board_to_string(boards[-1]))
     if move2 is None:
-        move2 = self.size**2
+        move2 = size**2
     return move1, move2
 
 

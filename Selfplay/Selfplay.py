@@ -92,5 +92,12 @@ class Selfplay:
         board_history = board_history[:-1]
         pi_history = np.array(pi_history)
         # to make lengths consistent, last boards doesn't trigger an action anyway
+        outcomes = np.ones(len(pi))
+        if black_lead == 0:
+            outcomes[:] = 0
+        elif black_lead > 0:
+            outcomes[1::2] = -1  # outcomes=[1,-1,1,-1...]
+        else:
+            outcomes[::2] = -1  # outcomes=[-1,1,-1,1...]
         
-        return black_lead, board_history, pi_history, player_history
+        return board_history, pi_history, player_history, outcomes, black_lead

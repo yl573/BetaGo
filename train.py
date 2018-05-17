@@ -8,16 +8,20 @@ trainer = Trainer(
     model_file='best_model.h5', 
     benchmark_file='best_model.h5',
     search_iters=110, 
+    buffer_len=4096,
     cpuct=1
 )
 
 for i in range(10):
     trainer.play_games_and_train(
-        num_games=20, 
+        num_games=1,
+        batch_size=1, 
+        num_evals=1,
         win_thresh=0.65, 
-        verbose=0, 
-        epochs=2, 
-        save_name='game_data/data_16_3_' + str(i) + '.pkl'
+        verbose=1, 
+        epochs=1, 
+        save_name=None#'game_data/data_16_3_' + str(i) + '.pkl'
     )
+    trainer.challenger.model.save('checkpoint.h5')
 
-trainer.challenger.model.save('checkpoint.h5')
+
