@@ -31,6 +31,7 @@ class MCTNode:
         self.P = P
         self.player = player
         self.children = {}
+        self.legal = get_legal(boards, player)
 
     def find_child(self, move):
         if str(move) in self.children:
@@ -111,10 +112,10 @@ class MCTS:
         assert boards.shape[0] == self.n_input
         self.maybe_reuse_tree(boards, player)
         for i in range(iterations):
-            self.depth = 0
+            # self.depth = 0
             self.search(self.root)
-        pi = np.power(self.root.N, 1 / self.temp) / np.sum(
-            np.power(self.root.N, 1 / self.temp))
+        exp = np.power(self.root.N, 1 / self.temp)
+        pi = exp / np.sum(exp)
         return pi
 
     def maybe_find_new_root(self, boards, player):
@@ -140,17 +141,16 @@ class MCTS:
         self.root = new_root
 
     def search(self, node):
-        self.depth += 1
-        legal = get_legal(node.boards, node.player)
-        U = self.cpuct * node.P * np.sqrt(np.sum(node.N)) / (1 + node.N)
+        # self.depth += 1
+        U = self.cpuct * node.P * np.sqrt(np.sum(node.N)+1) / (1 + node.N)
         score = (node.Q + U)
-        if np.sum(score) == 0:
-            score = np.random.uniform(size=(self.size**2 + 1))
+        # if np.sum(score) == 0:
+        #     score = np.random.uniform(size=(self.size**2 + 1))
 
-        score[np.where(legal == 0)] = -np.inf
+        score[np.where(node.legal == 0)] = -np.inf
         move = np.argmax(score)
 
-        assert legal[move] == 1
+        assert node.legal[move] == 1
         child = node.find_child(move)
         if child is None:
             next_board, next_player, end = simulate_move(

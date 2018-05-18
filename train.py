@@ -14,9 +14,9 @@ trainer = Trainer(
 
 for i in range(10):
     trainer.play_games_and_train(
-        num_games=50,
+        num_games=1,
         batch_size=1024, 
-        num_evals=20,
+        num_evals=1,
         win_thresh=0.65, 
         verbose=0, 
         epochs=1, 

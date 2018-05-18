@@ -20,16 +20,14 @@ class Trainer:
         if not self.buffer:
             self.buffer = data
             return
-
         self.buffer['boards'] = np.vstack((self.buffer['boards'], data['boards']))[:self.buffer_len]
         self.buffer['pi'] = np.vstack((self.buffer['pi'], data['pi']))[:self.buffer_len]
         self.buffer['outcomes'] = np.concatenate((self.buffer['outcomes'], data['outcomes']))[:self.buffer_len]
         self.buffer['players'] = np.concatenate((self.buffer['players'], data['players']))[:self.buffer_len]
 
-
     def sample_from_replay_buffer(self, samples):
-        ind = np.random.randint(0, high=len(self.buffer), size=samples)
-        print(ind)
+        ind = np.random.randint(0, high=len(self.buffer['boards']), size=samples)
+        # print(ind)
         data = {
             'boards' : self.buffer['boards'][ind],
             'pi' : self.buffer['pi'][ind],
