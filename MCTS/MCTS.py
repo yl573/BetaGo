@@ -109,7 +109,7 @@ class MCTS:
 
     def search_for_pi(self, boards, player, iterations):
         assert boards.shape[0] == self.n_input
-        # self.maybe_reuse_tree(boards, player)
+        self.maybe_reuse_tree(boards, player)
         for i in range(iterations):
             self.depth = 0
             self.search(self.root)
@@ -130,12 +130,13 @@ class MCTS:
             return grand_child
         return None
 
+    # not working and can't be bothered to fix, just create a new one  ¯\_(ツ)_/¯ 
     def maybe_reuse_tree(self, boards, player):
-        new_root = self.maybe_find_new_root(boards, player)
-        if new_root is None:
-            new_root = self.create_node(boards, player, False)
-        else:
-            print('tree reused')
+        # new_root = self.maybe_find_new_root(boards, player)
+        # if new_root is None:
+        new_root = self.create_node(boards, player, False)
+        # else:
+        #     print('tree reused')
         self.root = new_root
 
     def search(self, node):

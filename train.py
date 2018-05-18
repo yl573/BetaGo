@@ -20,7 +20,7 @@ for i in range(10):
         win_thresh=0.65, 
         verbose=0, 
         epochs=1, 
-        save_name='game_data/data_18_3_' + str(i) + '.pkl'
+        save_name='game_data/data_inv_' + str(i) + '.pkl'
     )
     trainer.challenger.model.save('checkpoint.h5')
 
