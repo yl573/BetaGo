@@ -109,7 +109,7 @@ class MCTS:
 
     def search_for_pi(self, boards, player, iterations):
         assert boards.shape[0] == self.n_input
-        self.maybe_reuse_tree(boards, player)
+        # self.maybe_reuse_tree(boards, player)
         for i in range(iterations):
             self.depth = 0
             self.search(self.root)
@@ -158,11 +158,14 @@ class MCTS:
             new_boards = np.vstack((node.boards[1:], next_board))
             child = self.create_node(new_boards, next_player, end)
             node.add_child(move, child)
-            V = child.V
+            V = -child.V
         elif child.is_end:
-            V = child.V
+            V = -child.V
         else:
-            V = self.search(child)
+            V = -self.search(child)
+
+        # Note: the value is inverted because a good value for the opponent
+        # is a bad value for the player
 
         node.W[move] += V
         node.N[move] += 1
