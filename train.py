@@ -5,7 +5,7 @@ import sys
 sys.stdout = writer('train.log', sys.stdout)
 
 trainer = Trainer(
-    model_file='best_model.h5', 
+    model_file='checkpoint.h5', 
     benchmark_file='best_model.h5',
     search_iters=110, 
     buffer_len=4096,
@@ -14,13 +14,13 @@ trainer = Trainer(
 
 for i in range(10):
     trainer.play_games_and_train(
-        num_games=1,
-        batch_size=1, 
-        num_evals=1,
+        num_games=50,
+        batch_size=1024, 
+        num_evals=20,
         win_thresh=0.65, 
-        verbose=1, 
+        verbose=0, 
         epochs=1, 
-        save_name=None#'game_data/data_16_3_' + str(i) + '.pkl'
+        save_name='game_data/data_18_3_' + str(i) + '.pkl'
     )
     trainer.challenger.model.save('checkpoint.h5')
 

@@ -3,6 +3,7 @@ import dill
 from Selfplay import Selfplay, MCTSAgent
 from Shared.Consts import BLACK, WHITE
 from Model import Model
+from tqdm import tqdm
 
 class Trainer:
     def __init__(self, model_file=None, benchmark_file=None, buffer_len=4096, size=5, input_moves=4, search_iters=110, cpuct=1):
@@ -20,14 +21,15 @@ class Trainer:
             self.buffer = data
             return
 
-        self.buffer['boards'] = np.concatenate(self.buffer['boards'], data['boards'])[:self.buffer_len]
-        self.buffer['pi'] = np.concatenate(self.buffer['pi'], data['pi'])[:self.buffer_len]
-        self.buffer['outcomes'] = np.concatenate(self.buffer['outcomes'], data['outcomes'])[:self.buffer_len]
-        self.buffer['players'] = np.concatenate(self.buffer['players'], data['players'])[:self.buffer_len]
+        self.buffer['boards'] = np.vstack((self.buffer['boards'], data['boards']))[:self.buffer_len]
+        self.buffer['pi'] = np.vstack((self.buffer['pi'], data['pi']))[:self.buffer_len]
+        self.buffer['outcomes'] = np.concatenate((self.buffer['outcomes'], data['outcomes']))[:self.buffer_len]
+        self.buffer['players'] = np.concatenate((self.buffer['players'], data['players']))[:self.buffer_len]
 
 
     def sample_from_replay_buffer(self, samples):
         ind = np.random.randint(0, high=len(self.buffer), size=samples)
+        print(ind)
         data = {
             'boards' : self.buffer['boards'][ind],
             'pi' : self.buffer['pi'][ind],
@@ -35,8 +37,6 @@ class Trainer:
             'players' : self.buffer['players'][ind]
         }
         return data
-
-
 
     def play_games_and_train(self, num_games=100, batch_size=1024, num_evals=20, win_thresh=0.6, verbose=0, epochs=3, save_name=None):
         data = self.generate_games(num_games, verbose) 
@@ -76,8 +76,9 @@ class Trainer:
 
     def evaluate_challenger(self, num_games, verbose):
         black_wins = 0
-        selfplay = Selfplay(self.benchmark, self.benchmark)
-        for i in range(num_games):
+        selfplay = Selfplay(self.challenger, self.benchmark)
+        print("Evaluating")
+        for i in tqdm(range(num_games)):
             _, _, _, _, black_leads = selfplay.play_game(verbose=verbose)
             if black_leads == 0:
                 black_wins += 0.5
@@ -93,9 +94,10 @@ class Trainer:
         outcome_history = np.array([])
         player_history = np.array([])
 
-        for i in range(num_games):
+        print("Generating")
+        for i in tqdm(range(num_games)):
             if verbose:
-                print("Generating game", i)
+                print("Game", i)
             boards, pi, player, outcome, black_leads = selfplay.play_game(verbose=verbose)
             if verbose:
                 print("Game ended, number of moves: ", len(pi))
