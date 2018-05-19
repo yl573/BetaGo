@@ -6,10 +6,7 @@ from GoGame.GoSimulator import GoSimulator
 import random
 import time
 
-def addBoardtoBoards(board,boards):
-    board_stack = board.reshape((1, *board.shape))
-    new_boards = np.vstack((boards, board_stack))
-    return new_boards
+
 
 def print_winner(black_lead):
     if black_lead > 0:
@@ -39,13 +36,13 @@ class Selfplay:
         n = self.n
         game = self.game
         player = self.player
-        board_history = np.zeros([1, n, n])
-        pi_history = []
+        boards_history = np.zeros((1, self.n, self.n))
+        pi_history = np.zeros((1, self.n**2 + 1))
         player_history = []
         agent_id = 0
         self.verbose = verbose
 
-        game.set_board(board_history[-1], player, None)
+        game.set_board(boards_history[-1], player, None)
 
         self.maybe_print('------------- START -------------\n')
 
@@ -56,10 +53,9 @@ class Selfplay:
 
             move, pi = agent.select_move(
                 # board_history[-min(self.n_input, 1)],
-                board_history,
+                boards_history,
                 player
             )
-
 
             if move == self.n**2: # PASS
                 self.maybe_print(player, ' PASSES \n')
@@ -77,9 +73,11 @@ class Selfplay:
                 agent.mcts.print_tree()
 
             # Append history
-            board_history = addBoardtoBoards(board, board_history)
+            board_stack = board.reshape((1, *board.shape))
+            boards_history = np.vstack((boards_history, board_stack))
+            pi_history = np.vstack((pi_history, pi))
             player_history.append(player)
-            pi_history.append(pi)
+            
             player = next_player
 
             if end_condition:
@@ -89,10 +87,8 @@ class Selfplay:
         black_lead = game.black_score_lead()
         if self.verbose:
             print_winner(black_lead)
-        board_history = board_history[:-1]
-        pi_history = np.array(pi_history)
         # to make lengths consistent, last boards doesn't trigger an action anyway
-        outcomes = np.ones(len(pi))
+        outcomes = np.ones(len(pi_history)-1)
         if black_lead == 0:
             outcomes[:] = 0
         elif black_lead > 0:
@@ -100,4 +96,4 @@ class Selfplay:
         else:
             outcomes[::2] = -1  # outcomes=[-1,1,-1,1...]
         
-        return board_history, pi_history, player_history, outcomes, black_lead
+        return boards_history[:-1], pi_history[:-1], np.array(player_history), outcomes, black_lead
