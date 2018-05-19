@@ -12,13 +12,12 @@ n_input = 4
 player = BLACK
 
 model_file = 'pretrain.h5'
-
 sys.stdout = writer('out.log', sys.stdout)
 
 game = GoSimulator(N)
 
 model = Model(saved_path=model_file, size=N, input_moves=n_input)
-agent1 = MCTSAgent(model, player, N, n_input, 110, cpuct=1, temp=1)
+agent1 = MCTSAgent(model, N, n_input, 110, cpuct=1, temp=0.1)
 agent2 = RandomAgent()
 
 game_selfplay = Selfplay(agent1, agent2, BLACK, N, n_input)
