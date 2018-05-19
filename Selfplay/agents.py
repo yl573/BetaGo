@@ -9,7 +9,6 @@ import random
 class MCTSAgent:
     def __init__(self,
                  model,
-                 player,
                  size,
                  input_moves,
                  search_iters,
@@ -20,9 +19,8 @@ class MCTSAgent:
         self.size = size
         self.iters = search_iters
         self.model = model
-        self.player = player
         self.input_moves = input_moves
-        self.mcts = MCTS(self.model, self.player, self.size, self.input_moves, cpuct, temp)
+        self.mcts = MCTS(self.model, self.size, self.input_moves, cpuct, temp)
 
     def select_move(self, boards, player):
         l = boards.shape[0]

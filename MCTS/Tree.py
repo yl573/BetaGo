@@ -6,7 +6,8 @@ def DFS(root):
         return OD()
     children = []
     for move in root.children:
-        children.append((str(move), DFS(root.children[move])))
+        txt = str(move) + ' ' + str(root.children[move].V)
+        children.append((txt, DFS(root.children[move])))
     return OD(children)
 
 # def write_tree_to_file(root, file_name):
