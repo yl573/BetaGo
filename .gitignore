@@ -9,3 +9,5 @@ __pycache__/
 *.zip
 eval.py
 score.py
+*.h5
+!pretrain.h5
