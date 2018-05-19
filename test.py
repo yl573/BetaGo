@@ -11,7 +11,7 @@ N = 5
 n_input = 4
 player = BLACK
 
-model_file = 'best_model.h5'
+model_file = 'pretrain.h5'
 
 sys.stdout = writer('out.log', sys.stdout)
 
