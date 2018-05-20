@@ -7,7 +7,4 @@ __pycache__/
 *.log
 *.pkl
 *.zip
-eval.py
-score.py
-*.h5
-!pretrain.h5
+
