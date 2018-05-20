@@ -12,23 +12,22 @@ class MCTSAgent:
                  size,
                  input_moves,
                  search_iters,
-                 cpuct,
-                 temp=1
+                 cpuct
                  ):
 
         self.size = size
         self.iters = search_iters
         self.model = model
         self.input_moves = input_moves
-        self.mcts = MCTS(self.model, self.size, self.input_moves, cpuct, temp)
+        self.mcts = MCTS(self.model, self.size, self.input_moves, cpuct)
 
-    def select_move(self, boards, player):
+    def select_move(self, boards, player, temp, diri):
         l = boards.shape[0]
         if self.input_moves > l:
             pad = np.zeros((self.input_moves - l, self.size, self.size))
             boards = np.vstack((pad, boards))
         boards = boards[-self.input_moves:]
-        pi = self.mcts.search_for_pi(boards, player, iterations=self.iters)
+        pi = self.mcts.search_for_pi(boards, player, iterations=self.iters, temp=temp, diri=diri)
         # Find position of next play that maximises pi
         move = np.random.choice(len(pi), p=pi)
         return move, pi

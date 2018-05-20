@@ -10,7 +10,7 @@ class Trainer:
     def __init__(self,
                  model_file=None,
                  benchmark_file=None,
-                 buffer_len=4096,
+                 buffer_len=8192,
                  init_buffer=[],
                  size=5,
                  input_moves=4,
@@ -71,9 +71,7 @@ class Trainer:
                              win_thresh=0.6,
                              verbose=0,
                              epochs=3,
-                             temp=1,
                              save_name=None):
-        self.benchmark.mcts.temp = temp
         data = self.generate_games(num_games, verbose)
         self.add_to_replay_buffer(data)
         training_data = self.sample_from_replay_buffer(batch_size)

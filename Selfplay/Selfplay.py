@@ -32,7 +32,7 @@ class Selfplay:
                 print(m, end='')
             print()
 
-    def play_game(self, print_tree=False, verbose=0):
+    def play_game(self, print_tree=False, verbose=0, greedy=False):
         n = self.n
         game = self.game
         player = self.player
@@ -51,10 +51,21 @@ class Selfplay:
             agent = self.agents[agent_id]
             agent_id = 1 - agent_id
 
+            if greedy:
+                temp = 0.05
+                diri = False
+            elif step < 5:
+                temp = 1
+                diri = False
+            else:
+                temp = 0.05
+                diri = True
+
             move, pi = agent.select_move(
-                # board_history[-min(self.n_input, 1)],
                 boards_history,
-                player
+                player,
+                temp,
+                diri
             )
 
             if move == self.n**2: # PASS

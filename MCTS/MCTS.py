@@ -89,12 +89,11 @@ def find_last_two_moves(boards):
 
 
 class MCTS:
-    def __init__(self, model, size, n_input, cpuct, temp):
+    def __init__(self, model, size, n_input, cpuct):
         self.model = model
         self.n_input = n_input
         self.size = size
         self.cpuct = cpuct
-        self.temp = temp
         self.root = None
         game = GoSimulator(self.size)
 
@@ -108,38 +107,48 @@ class MCTS:
     def print_tree(self):
         print_tree(self.root)
 
-    def search_for_pi(self, boards, player, iterations):
+    def search_for_pi(self, boards, player, iterations, diri=False, temp=1):
         assert boards.shape[0] == self.n_input
-        self.maybe_reuse_tree(boards, player)
+        self.root = self.create_node(boards, player, False)
+
+        if diri:
+            temp = 0.05
+            alpha = tuple([0.03] * (self.size**2+1))
+            nu = np.random.dirichlet(alpha)
+            self.root.P = 0.75 * self.root.P + 0.25 * nu
+
         for i in range(iterations):
             self.search(self.root)
 
-        exp = np.power(self.root.N, 1 / self.temp)
+        exp = np.power(self.root.N, 1 / temp)
         pi = exp / np.sum(exp)
-
+        # print('P', self.root.P)
+        # print('V', self.root.V)
+        # print('Q', self.root.Q)
+        # print('Max Action Value',np.max(self.root.Q))
         return pi
 
-    def maybe_find_new_root(self, boards, player):
-        if self.root is None:
-            return None
-        if (not np.array_equal(boards[-3], self.root.boards)) or (
-                player is not self.root.player):
-            return None
-        move1, move2 = find_last_two_moves(boards)
-        child = self.root.find_child(move1)
-        if child is not None:
-            grand_child = child.find_child(move2)
-            return grand_child
-        return None
+    # def maybe_find_new_root(self, boards, player):
+    #     if self.root is None:
+    #         return None
+    #     if (not np.array_equal(boards[-3], self.root.boards)) or (
+    #             player is not self.root.player):
+    #         return None
+    #     move1, move2 = find_last_two_moves(boards)
+    #     child = self.root.find_child(move1)
+    #     if child is not None:
+    #         grand_child = child.find_child(move2)
+    #         return grand_child
+    #     return None
 
     # not working and can't be bothered to fix, just create a new one  ¯\_(ツ)_/¯ 
-    def maybe_reuse_tree(self, boards, player):
-        # new_root = self.maybe_find_new_root(boards, player)
-        # if new_root is None:
-        new_root = self.create_node(boards, player, False)
-        # else:
-        #     print('tree reused')
-        self.root = new_root
+    # def maybe_reuse_tree(self, boards, player):
+    #     # new_root = self.maybe_find_new_root(boards, player)
+    #     # if new_root is None:
+    #     new_root = self.create_node(boards, player, False)
+    #     # else:
+    #     #     print('tree reused')
+    #     self.root = new_root
 
     def search(self, node):
         U = self.cpuct * node.P * np.sqrt(np.sum(node.N)+1) / (1 + node.N)
