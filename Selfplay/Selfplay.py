@@ -36,7 +36,7 @@ class Selfplay:
         n = self.n
         game = self.game
         player = self.player
-        boards_history = np.zeros((1, self.n, self.n))
+        boards_history = np.zeros((2, self.n, self.n))
         pi_history = np.zeros((1, self.n**2 + 1))
         player_history = []
         agent_id = 0
@@ -107,4 +107,4 @@ class Selfplay:
         else:
             outcomes[::2] = -1  # outcomes=[-1,1,-1,1...]
         
-        return boards_history[:-1], pi_history[:-1], np.array(player_history), outcomes, black_lead
+        return boards_history[:-2], pi_history[:-1], np.array(player_history), outcomes, black_lead

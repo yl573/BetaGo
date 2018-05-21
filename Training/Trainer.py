@@ -80,14 +80,16 @@ class Trainer:
         print('Challenger wins with probability', win_prob)
 
         if win_prob >= win_thresh:
-            print(
-                "Challenger outperformed benchmark, setting benchmark to challenger"
-            )
+            print("Challenger outperformed benchmark, setting benchmark to challenger")
             self.challenger.model.save('best_model.h5')
-            # set the benchmark agent's model to the challenger's model
-            benchmark_model = Model(self.size, self.input_moves,
-                                    'best_model.h5')
+            benchmark_model = Model(self.size, self.input_moves, 'best_model.h5')
             self.benchmark.model = benchmark_model
+            
+        elif win_prob <= 0.35:
+            print('Challenger is significantly worse, resetting it to benchmark')
+            challenger_model = Model(self.size, self.input_moves, 'best_model.h5')
+            self.challenger.model = challenger_model   
+
         else:
             print("Challenger cannot outperform benchmark")
 
@@ -111,13 +113,20 @@ class Trainer:
         selfplay = Selfplay(self.challenger, self.benchmark)
         print("Evaluating")
         for i in tqdm(range(num_games)):
-            _, _, _, _, black_leads = selfplay.play_game(verbose=verbose)
+            _, _, _, _, black_leads = selfplay.play_game(verbose=verbose, greedy=True)
+            selfplay = self.swap_players(selfplay)
             if black_leads == 0:
                 black_wins += 0.5
             elif black_leads > 0:
                 black_wins += 1
 
         return black_wins / num_games
+
+    def swap_players(self, selfplay):
+        temp_agent = selfplay.agents[0]
+        selfplay.agents[0] = selfplay.agents[1]
+        selfplay.agents[1] = temp_agent
+        return selfplay
 
     def generate_games(self, num_games, verbose):
         selfplay = Selfplay(self.benchmark, self.benchmark)
@@ -132,6 +141,7 @@ class Trainer:
                 print("Game", i)
             boards, pi, player, outcome, black_leads = selfplay.play_game(
                 verbose=verbose)
+            selfplay = self.swap_players(selfplay)
             if verbose:
                 print("Game ended, number of moves: ", len(pi))
                 print()

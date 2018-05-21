@@ -37,7 +37,8 @@ class RandomAgent:
     def __init__(self):
         pass
 
-    def select_move(self, boards, player):
+
+    def select_move(self, boards, player, *args, **kwargs):
         n = boards.shape[1]
         game = GoSimulator(n)
         game.set_board_from_prev_boards(boards, player)
