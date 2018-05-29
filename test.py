@@ -16,15 +16,15 @@ sys.stdout = writer('out.log', sys.stdout)
 game = GoSimulator(N)
 
 # model1 = Model(saved_path='best_model.h5', size=N, input_moves=n_input)
-model2 = Model(saved_path='best_model.h5', size=N, input_moves=n_input)
+model2 = Model(saved_path='pretrain.h5', size=N, input_moves=n_input)
 
 agent1 = RandomAgent()#MCTSAgent(model1, N, n_input, 110, cpuct=1)
-agent2 = MCTSAgent(model2, N, n_input, 110, cpuct=1)
+agent2 = MCTSAgent(model2, N, n_input, 110, cpuct=5)
 
 game_selfplay = Selfplay(agent1, agent2, BLACK, N, n_input)
 
 t0 = time.time()
-board_history, pi_history,_ ,_ ,black_lead = game_selfplay.play_game(print_tree=False, verbose=1, greedy=True)
+board_history, pi_history,_ ,_ ,black_lead = game_selfplay.play_game(print_tree=True, verbose=1, greedy=True)
 t1 = time.time()
 
 print('Time taken (secs): ', t1 - t0)

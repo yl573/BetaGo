@@ -111,6 +111,8 @@ class MCTS:
         assert boards.shape[0] == self.n_input
         self.root = self.create_node(boards, player, False)
 
+        print(self.root.P)
+
         if diri:
             temp = 0.05
             alpha = tuple([0.03] * (self.size**2+1))

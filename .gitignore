@@ -7,4 +7,6 @@ __pycache__/
 *.log
 *.pkl
 *.zip
+game_data/
+
 
