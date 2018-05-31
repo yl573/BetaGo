@@ -12,7 +12,7 @@ class Model:
         self.n_in = input_moves
         self.size = size
 
-    def _reshape_input(self, input_boards, player):
+    def reshape_input(self, input_boards, player):
         assert len(input_boards) == self.n_in
 
         dim = len(input_boards)*2+1
@@ -33,40 +33,41 @@ class Model:
             out[0,-1,:,:] = np.zeros(input_boards[0].shape)
         return out
 
-    def format_board_history(self, boards, players):
+    # def format_board_history(self, boards, players):
 
-        formatted = np.zeros((
-            len(boards), 
-            self.n_in*2+1,
-            self.size, 
-            self.size
-        ))
-        padding = np.zeros((self.n_in-1, self.size, self.size))
-        boards = np.concatenate((padding, boards))
-        for i in range(len(boards)-self.n_in):
-            reshaped = self._reshape_input(boards[i:i+self.n_in], players[i])
-            # print(reshaped.shape)
-            formatted[i,:,:,:] = reshaped
-        return formatted
+    #     formatted = np.zeros((
+    #         len(boards), 
+    #         self.n_in*2+1,
+    #         self.size, 
+    #         self.size
+    #     ))
+    #     padding = np.zeros((self.n_in-1, self.size, self.size))
+    #     boards = np.concatenate((padding, boards))
+    #     for i in range(len(boards)-self.n_in):
+    #         reshaped = self._reshape_input(boards[i:i+self.n_in], players[i])
+    #         # print(reshaped.shape)
+    #         formatted[i,:,:,:] = reshaped
+    #     return formatted
 
     def save(self, file_path):
         self.model.save(file_path)
 
-    def fit(self, boards, pi, outcomes, players, epochs):
-        assert len(boards) == len(pi) == len(outcomes) == len(players)
-        assert boards.shape[1] == boards.shape[2] == self.size
+    def fit(self, data, epochs):
+        boards, pi, outcomes = data[:,0], data[:,1], data[:,3]
+        for i, board in enumerate(boards):
+            reshaped = self.reshape_input(board, data[i,2])
+            boards[i] = reshaped
 
-        import dill
-        formatted_boards = self.format_board_history(boards, players)
-        with open('formatted.pkl', "wb") as f:
-            dill.dump(formatted_boards, f)
+        boards = np.vstack(tuple(boards))
+        pi = np.vstack(tuple(pi))
+        outcomes = np.array(outcomes)
 
-        self.model.fit(formatted_boards, [pi, outcomes], epochs=epochs)
+        self.model.fit(boards, [pi, outcomes], epochs=epochs)
                     
     def eval(self, boards, next_player):
         assert boards.shape[0] == self.n_in
 
-        processed_boards = self._reshape_input(boards, next_player)
+        processed_boards = self.reshape_input(boards, next_player)
         pred = self.model.predict(processed_boards)
 
         policy = pred[0].reshape((-1))

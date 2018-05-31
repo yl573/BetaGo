@@ -8,5 +8,6 @@ __pycache__/
 *.pkl
 *.zip
 game_data/
+*.h5
 
 

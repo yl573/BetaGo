@@ -4,6 +4,7 @@ from GoGame.GoSimulator import GoSimulator, board_to_string
 from GoGame.GoBackend import find_move
 from Shared.Consts import BLACK, WHITE
 from Shared.Functions import toggle_player
+from .Augment import eval_augment, reverse_P
 from .Tree import print_tree
 
 
@@ -101,7 +102,10 @@ class MCTS:
         if end:
             P, V = process_end_state(boards, player)
         else:
-            P, V = self.model.eval(boards, player)
+            augmented, rev_args = eval_augment(boards)
+            aug_P, V = self.model.eval(augmented, player)
+            P = reverse_P(aug_P, *rev_args)
+
         return MCTNode(boards, P, V, player)
 
     def print_tree(self):
@@ -111,7 +115,7 @@ class MCTS:
         assert boards.shape[0] == self.n_input
         self.root = self.create_node(boards, player, False)
 
-        print(self.root.P)
+        # print(self.root.P)
 
         if diri:
             temp = 0.05
@@ -129,28 +133,6 @@ class MCTS:
         # print('Q', self.root.Q)
         # print('Max Action Value',np.max(self.root.Q))
         return pi
-
-    # def maybe_find_new_root(self, boards, player):
-    #     if self.root is None:
-    #         return None
-    #     if (not np.array_equal(boards[-3], self.root.boards)) or (
-    #             player is not self.root.player):
-    #         return None
-    #     move1, move2 = find_last_two_moves(boards)
-    #     child = self.root.find_child(move1)
-    #     if child is not None:
-    #         grand_child = child.find_child(move2)
-    #         return grand_child
-    #     return None
-
-    # not working and can't be bothered to fix, just create a new one  ¯\_(ツ)_/¯ 
-    # def maybe_reuse_tree(self, boards, player):
-    #     # new_root = self.maybe_find_new_root(boards, player)
-    #     # if new_root is None:
-    #     new_root = self.create_node(boards, player, False)
-    #     # else:
-    #     #     print('tree reused')
-    #     self.root = new_root
 
     def search(self, node):
         U = self.cpuct * node.P * np.sqrt(np.sum(node.N)+1) / (1 + node.N)

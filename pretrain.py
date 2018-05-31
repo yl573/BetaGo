@@ -1,10 +1,9 @@
 
-from Model import Model
 import dill
 import os
 import numpy as np
-
-model = Model(5, 4, None)
+from MCTS.Augment import augment_dataset
+from Shared.Consts import BLACK, WHITE
 
 folder = "game_data"
 files = os.listdir(folder)
@@ -22,16 +21,12 @@ for file_name in files:
         if not buffer:
             buffer = data
         else:
-            buffer['boards'] = np.vstack(
-                (buffer['boards'], data['boards']))
-            buffer['pi'] = np.vstack((buffer['pi'],
-                                           data['pi']))
-            buffer['outcomes'] = np.concatenate(
-                (buffer['outcomes'], data['outcomes']))
-            buffer['players'] = np.concatenate(
-                (buffer['players'], data['players']))
+            buffer = np.vstack((buffer, data))
 
-model.fit(buffer['boards'], buffer['pi'],
-            buffer['outcomes'], buffer['players'], 10)
+augmented = augment_dataset(buffer[20:21])
 
-model.save('pretrain.h5')
+from Model import Model
+
+model = Model(5, 4, None)
+model.fit(augmented, 10)
+model.save('test.h5')

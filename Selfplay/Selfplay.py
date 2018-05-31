@@ -36,12 +36,10 @@ class Selfplay:
         n = self.n
         game = self.game
         player = self.player
-        boards_history = np.zeros((2, self.n, self.n))
-        pi_history = np.zeros((1, self.n**2 + 1))
-        player_history = []
+        data = []
+        boards_history = np.zeros((self.n_input, self.n, self.n))
         agent_id = 0
         self.verbose = verbose
-
         game.set_board(boards_history[-1], player, None)
 
         self.maybe_print('------------- START -------------\n')
@@ -84,10 +82,15 @@ class Selfplay:
                 agent.mcts.print_tree()
 
             # Append history
+            data.append((
+                boards_history[-self.n_input:],
+                pi,
+                player,
+                None
+            ))
             board_stack = board.reshape((1, *board.shape))
             boards_history = np.vstack((boards_history, board_stack))
-            pi_history = np.vstack((pi_history, pi))
-            player_history.append(player)
+
             
             player = next_player
 
@@ -99,12 +102,16 @@ class Selfplay:
         if self.verbose:
             print_winner(black_lead)
         # to make lengths consistent, last boards doesn't trigger an action anyway
-        outcomes = np.ones(len(pi_history)-1)
+        outcomes = np.ones(len(data))
         if black_lead == 0:
             outcomes[:] = 0
         elif black_lead > 0:
             outcomes[1::2] = -1  # outcomes=[1,-1,1,-1...]
         else:
             outcomes[::2] = -1  # outcomes=[-1,1,-1,1...]
+        for i, d in enumerate(data):
+            new_d = list(d)
+            new_d[3] = outcomes[i]
+            data[i] = tuple(new_d)
         
-        return boards_history[:-2], pi_history[:-1], np.array(player_history), outcomes, black_lead
+        return np.array(data), black_lead
