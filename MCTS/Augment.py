@@ -50,15 +50,20 @@ def eval_augment(arr):
 
 def augment_dataset(dataset):
     # 8x the dataset with augmentation
-    augmented = np.array(dataset[0])
+#     augmented = np.array(dataset[0])
+    augmented = np.empty_like(dataset)
+    for i in range(3):
+        augmented = np.vstack((augmented, augmented))
     for i in range(len(dataset)):
         for k in range(4):
             rotated_boards, rotated_pi = rotate(dataset[i][0], dataset[i][1], k)
             flipped_boards, flipped_pi = flip(rotated_boards, rotated_pi) 
             rotated_data = [rotated_boards, rotated_pi, dataset[i][2], dataset[i][3]] 
             flipped_data = [flipped_boards, flipped_pi, dataset[i][2], dataset[i][3]] 
-            augmented = np.vstack((augmented, rotated_data))
-            augmented = np.vstack((augmented, flipped_data))
+            augmented[i*8+k*2, :] = rotated_data
+            augmented[i*8+k*2+1, :] = flipped_data
+#             augmented = np.vstack((augmented, rotated_data))
+#             augmented = np.vstack((augmented, flipped_data))
 
     return augmented[1:]
 
