@@ -4,6 +4,7 @@ from Selfplay import Selfplay, MCTSAgent
 from Shared.Consts import BLACK, WHITE
 from Model import Model
 from tqdm import tqdm
+from MCTS.Augment import augment_dataset
 
 
 class Trainer:
@@ -54,12 +55,16 @@ class Trainer:
                              win_thresh=0.6,
                              verbose=0,
                              epochs=3,
+                             augment=True,
                              save_name=None):
         data = self.generate_games(num_games, verbose)
         if save_name:
             self.save_data(data, save_name)
         self.add_to_replay_buffer(data)
         training_data = self.sample_from_replay_buffer(batch_size)
+        if augment:
+            training_data = augment_dataset(training_data)
+            
         self.train_challenger(training_data, epochs)
         win_prob = self.evaluate_challenger(num_evals, verbose)
         print('Challenger wins with probability', win_prob)
