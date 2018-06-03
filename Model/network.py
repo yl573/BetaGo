@@ -29,7 +29,7 @@ def residual_block(y):
     return y
 
 def policy_loss(y_true, y_pred):
-    return -K.sum(y_true * K.log(y_pred))
+    return K.mean(-K.sum(y_true * K.log(y_pred), axis=1))
 
 def load_network(file_path):
     return load_model(file_path, custom_objects={'policy_loss': policy_loss})
