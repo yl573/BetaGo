@@ -16,7 +16,7 @@ sys.stdout = writer('out.log', sys.stdout)
 game = GoSimulator(N)
 
 # model1 = Model(saved_path='best_model.h5', size=N, input_moves=n_input)
-model1 = Model(saved_path='pretrain.h5', size=N, input_moves=n_input)
+model1 = Model(saved_path='Trained_Models/pretrain.h5', size=N, input_moves=n_input)
 
 agent1 = MCTSAgent(model1, N, n_input, 110, cpuct=1)
 agent2 = RandomAgent()#MCTSAgent(model2, N, n_input, 110, cpuct=5)

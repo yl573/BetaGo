@@ -5,6 +5,7 @@ import os
 import time
 
 # Default paths. Change as needed
+MODEL_DIR = 'Trained_Models'
 BENCHMARK = 'michael_best_040618.h5'
 INIT_MODEL  = 'michael_best_040618.h5'
 SAVE_DIR = 'game_data'
@@ -22,8 +23,8 @@ else:
 os.makedirs(SAVE_DIR, exist_ok=True)
 
 trainer = Trainer(
-    model_file=INIT_MODEL, 
-    benchmark_file=BENCHMARK,
+    model_file=os.path.join(MODEL_DIR, INIT_DIR), 
+    benchmark_file=os.path.join(MODEL_DIR, BENCHMARK),
     search_iters=110, 
     buffer_len=16384,
     cpuct=1
