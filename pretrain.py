@@ -4,10 +4,13 @@ import os
 import numpy as np
 from MCTS.Augment import augment_dataset
 from Shared.Consts import BLACK, WHITE
+from Shared.Functions import specify_user
 
 folder = "game_data"
 files = os.listdir(folder)
 print(files)
+
+user = specify_user(fn='user_info.txt')
 
 buffer = None
 
@@ -29,4 +32,4 @@ from Model import Model
 
 model = Model(5, 4, None)
 model.fit(augmented, 10)
-model.save('test.h5')
+model.save(os.path.join('Trained_Models', user+'_test.h5'))
