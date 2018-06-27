@@ -9,5 +9,6 @@ __pycache__/
 *.zip
 game_data/
 *.h5
+!michael_best_model.h5
 
 

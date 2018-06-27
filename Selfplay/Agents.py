@@ -4,6 +4,7 @@ from GoGame.GoSimulator import GoSimulator, board_to_string
 from GoGame.GoBackend import find_move
 import numpy as np
 import random
+import re
 
 
 class MCTSAgent:
@@ -46,4 +47,19 @@ class RandomAgent:
         pi = np.append(legal, [1])
         pi = np.divide(pi, np.sum(pi))
         move = np.random.choice(len(pi), p=pi)
+        return move, pi
+
+class UserAgent:
+    def __init__(self):
+        pass
+
+    def select_move(self, boards, player, *args, **kwargs):
+        inp = input('Input move: row, col, enter to pass\n')
+        match = re.match(r'([0-4]),([0-4])', inp)
+        if match:
+            move = int(match.group(1)) * 5 + int(match.group(2))
+        else:
+            move = 25
+        pi = np.zeros(26)
+        pi[move] = 1
         return move, pi
