@@ -3,7 +3,7 @@ A scaled down version of AlphaGo Zero, playing on a 5x5 board
 
 # Video Demo
 
-[![BetaGo](https://www.youtube.com/watch?v=FMNroKQ-srg/0.jpg)](https://www.youtube.com/watch?v=FMNroKQ-srg)
+[![BetaGo](video_img.png)](https://www.youtube.com/watch?v=FMNroKQ-srg)
 
 ## Overview
 
