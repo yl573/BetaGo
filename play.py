@@ -13,10 +13,10 @@ player = BLACK
 
 game = GoSimulator(N)
 
-model = Model(saved_path='michael_best.h5', size=N, input_moves=n_input)
+model = Model(saved_path='michael_best_model.h5', size=N, input_moves=n_input)
 # model = Model(size=N, input_moves=n_input)
 
-agent1 = MCTSAgent(model, N, n_input, 110, cpuct=5)
+agent1 = MCTSAgent(model, N, n_input, 110, cpuct=1)
 agent2 = UserAgent()
 
 game_selfplay = Selfplay(agent1, agent2, BLACK, N, n_input)

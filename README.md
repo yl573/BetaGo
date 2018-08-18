@@ -1,6 +1,10 @@
 # BetaGo
 A scaled down version of AlphaGo Zero, playing on a 5x5 board
 
+# Video Demo
+
+[![BetaGo](https://www.youtube.com/watch?v=FMNroKQ-srg/0.jpg)](https://www.youtube.com/watch?v=FMNroKQ-srg)
+
 ## Overview
 
 This projects aims to reimplement the [AlphaGo Zero paper](https://www.nature.com/articles/nature24270) to play on a 5x5 board.

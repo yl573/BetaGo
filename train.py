@@ -23,7 +23,7 @@ else:
 os.makedirs(SAVE_DIR, exist_ok=True)
 
 trainer = Trainer(
-    model_file=os.path.join(MODEL_DIR, INIT_DIR), 
+    # model_file=os.path.join(MODEL_DIR, INIT_DIR), 
     benchmark_file=os.path.join(MODEL_DIR, BENCHMARK),
     search_iters=110, 
     buffer_len=16384,
